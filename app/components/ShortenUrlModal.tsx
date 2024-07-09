@@ -19,9 +19,10 @@ import Image from "next/image";
 interface ShortenUrlProps {
   open: boolean;
   onClose: (value: boolean) => void;
+  refresh: () => void;
 }
 
-const ShortenUrlModal = ({ open, onClose }: ShortenUrlProps) => {
+const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
   const [formData, setFormData] = useState({ name: "", longUrl: "" });
   const firestore = getFirestore();
   const [img, setImg] = useState<string | null>(null);
@@ -43,13 +44,11 @@ const ShortenUrlModal = ({ open, onClose }: ShortenUrlProps) => {
   };
 
   const handleSubmit = async () => {
-    const shortCodeId = nanoid(6);
     let link = {
       name: formData.name,
       longUrl: formData.longUrl,
       createdAt: Timestamp.now(),
-      shortCode: shortCodeId,
-      qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.host}/${shortCodeId}`,
+      shortCode: nanoid(5),
       totalClicks: 0,
     };
 
@@ -60,6 +59,7 @@ const ShortenUrlModal = ({ open, onClose }: ShortenUrlProps) => {
       addDoc(linksCollectionRef, link)
         .then((docRef) => {
           console.log("Document written with ID: ", docRef.id);
+          refresh();
           handleClose();
         })
         .catch((error) => {
@@ -81,7 +81,6 @@ const ShortenUrlModal = ({ open, onClose }: ShortenUrlProps) => {
         className="max-w-md w-full flex flex-col gap-5 bg-white p-5 rounded relative z-20"
         onClick={(event) => event.stopPropagation()}
       >
-        {img !== null && <img src={img} alt="qr" height={100} width={100} />}
         <div className="flex justify-between">
           <p className="text-black text-lg font-medium">Create short URL</p>
           <IoClose

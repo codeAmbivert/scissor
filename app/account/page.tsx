@@ -4,57 +4,28 @@ import { HiChartSquareBar } from "react-icons/hi";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "../firebase";
+import { auth, firestore } from "../firebase";
 import ShortenUrlModal from "../components/ShortenUrlModal";
+import { collection, doc, getDocs, query, Timestamp } from "firebase/firestore";
+import Image from "next/image";
+
+interface Link {
+  id: string;
+  name: string;
+  longUrl: string;
+  createdAt: Timestamp;
+  shortCode: string;
+  totalClicks: number;
+}
 
 const Account = () => {
   const router = useRouter();
   const [createNew, setCreateNew] = useState<boolean>(false);
+  const [links, setLinks] = useState<Link[]>([]);
 
   useEffect(() => {
     auth.onAuthStateChanged((user) => !user && router.push("/"));
   }, []);
-
-  // useEffect(() => {
-  //   if (!user) {
-  //     router.push("/");
-  //   }
-  // }, [user]);
-
-  const dummyData = [
-    {
-      id: "iiwudqwkjcn",
-      createdAt: new Date(),
-      name: "My website",
-      longUrl: "https://www.google.com",
-      shortCode: "masdc",
-      totalClicks: 313,
-    },
-    {
-      id: "iiwudqwkjcn",
-      createdAt: new Date(),
-      name: "My website",
-      longUrl: "https://www.google.com",
-      shortCode: "masdc",
-      totalClicks: 313,
-    },
-    {
-      id: "iiwudqwkjcn",
-      createdAt: new Date(),
-      name: "My website",
-      longUrl: "https://www.google.com",
-      shortCode: "masdc",
-      totalClicks: 313,
-    },
-    {
-      id: "iiwudqwkjcn",
-      createdAt: new Date(),
-      name: "My website",
-      longUrl: "https://www.google.com",
-      shortCode: "masdc",
-      totalClicks: 313,
-    },
-  ];
 
   const copyText = async (text: string) => {
     try {
@@ -64,6 +35,43 @@ const Account = () => {
       console.error("Failed to copy: ", err);
     }
   };
+
+  const fetchLinks = async () => {
+    if (auth.currentUser) {
+      const userDocRef = doc(firestore, "users", auth.currentUser.uid);
+      const linksCollectionRef = collection(userDocRef, "links");
+      const q = query(linksCollectionRef);
+
+      try {
+        const querySnapshot = await getDocs(q);
+        const links: Link[] = [];
+        querySnapshot.forEach((doc) => {
+          const linkData = doc.data();
+          const link: Link = {
+            id: doc.id,
+            name: linkData.name, // Assuming doc.data() contains a 'name' property
+            longUrl: linkData.longUrl, // Assuming doc.data() contains a 'longUrl' property
+            createdAt: linkData.createdAt, // Assuming doc.data() contains a 'createdAt' property
+            shortCode: linkData.shortCode, // Assuming doc.data() contains a 'shortCode' property
+            totalClicks: linkData.totalClicks, // Assuming doc.data() contains a 'totalClicks' property
+          };
+          links.push(link);
+        });
+        setLinks(links);
+      } catch (error) {
+        console.error("Error fetching documents: ", error);
+      }
+    } else {
+      console.log("User not logged in");
+      // Handle the case when the user is not logged in, e.g., set links to an empty array or show a message
+    }
+  };
+
+  useEffect(() => {
+    fetchLinks();
+  }, []);
+
+  console.log(links);
 
   return (
     <main>
@@ -86,59 +94,76 @@ const Account = () => {
         </div>
 
         <div className="mt-10">
-          {dummyData.length > 0 &&
-            dummyData.map((item, i) => (
-              <div
-                key={item?.id}
-                className={`py-5 flex items-center justify-between ${
-                  dummyData.length - 1 !== i && "border-b-2"
-                } border-gray-200 gap-10 flex-wrap`}
-              >
-                <div>
-                  <p className="text-gray-500 text-xs uppercase">
-                    CREATED AT {format(item?.createdAt, "PPP")}
-                  </p>
-                  <p className="text-lg font-medium text-secondary mt-2">
-                    {item?.name}
-                  </p>
-                  <Link href={"#"} className="text-sm">
-                    {item?.longUrl}
-                  </Link>
+          {links.length > 0 &&
+            links
+              .sort(
+                (prvLink, nxtLink) =>
+                  nxtLink.createdAt.toDate().getTime() -
+                  prvLink.createdAt.toDate().getTime()
+              )
+              .map((item, i) => (
+                <div
+                  key={item?.id}
+                  className={`py-5 flex items-center justify-between ${
+                    links.length - 1 !== i && "border-b-2"
+                  } border-gray-200 gap-10 flex-wrap`}
+                >
+                  <div>
+                    <p className="text-gray-500 text-xs uppercase">
+                      CREATED AT{" "}
+                      {format(item?.createdAt.toDate(), "d MMM, HH:mm")}
+                    </p>
+                    <p className="text-lg font-medium text-secondary mt-2">
+                      {item?.name}
+                    </p>
+                    <Link href={"#"} className="text-sm">
+                      {item?.longUrl}
+                    </Link>
 
-                  <div className="flex gap-5 items-center mt-3">
-                    <p className="text-primary text-sm">
-                      {window.location.host}/{item?.shortCode}
+                    <div className="flex gap-5 items-center mt-3">
+                      <p className="text-primary text-sm">
+                        {window.location.host}/{item?.shortCode}
+                      </p>
+                      <button
+                        className="border-2 border-primary text-[0.6rem] font-medium rounded-md text-primary py-1 px-3"
+                        onClick={() => copyText("mywebsite.com")}
+                      >
+                        COPY
+                      </button>
+                      <button
+                        className="border-2 border-red-500 text-[0.6rem] font-medium rounded-md text-red-500 py-1 px-3"
+                        // onClick={() => copyText("mywebsite.com")}
+                      >
+                        DELETE
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-secondary">
+                        {item?.totalClicks}
+                      </p>
+                      <HiChartSquareBar size={22} className="text-gray-500" />
+                    </div>
+                    <p className="text-gray-500 text-xs font-medium mb-2">
+                      TOTAL CLICKS
                     </p>
-                    <button
-                      className="border-2 border-primary text-[0.6rem] font-medium rounded-md text-primary py-1 px-3"
-                      onClick={() => copyText("mywebsite.com")}
-                    >
-                      COPY
-                    </button>
-                    <button
-                      className="border-2 border-red-500 text-[0.6rem] font-medium rounded-md text-red-500 py-1 px-3"
-                      // onClick={() => copyText("mywebsite.com")}
-                    >
-                      DELETE
-                    </button>
+                    <Image
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.host}/${item?.shortCode}`}
+                      alt="QR Code"
+                      height={100}
+                      width={100}
+                    />
                   </div>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-secondary">
-                      {item?.totalClicks}
-                    </p>
-                    <HiChartSquareBar size={22} className="text-gray-500" />
-                  </div>
-                  <p className="text-gray-500 text-xs font-medium">
-                    TOTAL CLICKS
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
         </div>
       </div>
-      <ShortenUrlModal open={createNew} onClose={setCreateNew} />
+      <ShortenUrlModal
+        open={createNew}
+        onClose={setCreateNew}
+        refresh={fetchLinks}
+      />
     </main>
   );
 };
