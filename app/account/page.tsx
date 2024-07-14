@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { HiChartSquareBar } from "react-icons/hi";
 import { format } from "date-fns";
@@ -6,8 +7,16 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, firestore } from "../firebase";
 import ShortenUrlModal from "../components/ShortenUrlModal";
-import { collection, doc, getDocs, query, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  Timestamp,
+} from "firebase/firestore";
 import Image from "next/image";
+import { toast, ToastContainer } from "react-toastify";
 
 interface Link {
   id: string;
@@ -25,7 +34,7 @@ const Account = () => {
 
   useEffect(() => {
     auth.onAuthStateChanged((user) => !user && router.push("/"));
-  }, []);
+  }, [auth]);
 
   const copyText = async (text: string) => {
     try {
@@ -67,6 +76,27 @@ const Account = () => {
     }
   };
 
+  const handleDelete = async (linkId: string) => {
+    if (auth.currentUser) {
+      const userDocRef = doc(firestore, "users", auth.currentUser.uid);
+      const linkDocRef = doc(userDocRef, "links", linkId);
+
+      deleteDoc(linkDocRef)
+        .then((docRef) => {
+          console.log("Document deleted", docRef);
+          // refresh();
+          // handleClose();
+          toast.success("Link deleted successfully");
+          setTimeout(() => {
+            fetchLinks();
+          }, 1000);
+        })
+        .catch((error) => {
+          console.error("Error deleting document: ", error);
+        });
+    }
+  };
+
   useEffect(() => {
     fetchLinks();
   }, []);
@@ -75,6 +105,7 @@ const Account = () => {
 
   return (
     <main>
+      <ToastContainer />
       <nav className="p-5 flex justify-between items-center bg-secondary text-white fixed w-full top-0 left-0">
         <p className="text-2xl font-bold">Scissor</p>
         <div>
@@ -116,38 +147,39 @@ const Account = () => {
                     <p className="text-lg font-medium text-secondary mt-2">
                       {item?.name}
                     </p>
-                    <Link href={"#"} className="text-sm">
+                    <Link href={`${item?.longUrl}`} className="text-sm">
                       {item?.longUrl}
                     </Link>
 
                     <div className="flex gap-5 items-center mt-3">
-                      <p className="text-primary text-sm">
+                      <Link
+                        href={`/${item?.shortCode}`}
+                        className="text-primary text-sm"
+                      >
                         {window.location.host}/{item?.shortCode}
-                      </p>
+                      </Link>
                       <button
                         className="border-2 border-primary text-[0.6rem] font-medium rounded-md text-primary py-1 px-3"
-                        onClick={() => copyText("mywebsite.com")}
+                        onClick={() =>
+                          copyText(`${window.location.host}/${item?.shortCode}`)
+                        }
                       >
                         COPY
                       </button>
                       <button
                         className="border-2 border-red-500 text-[0.6rem] font-medium rounded-md text-red-500 py-1 px-3"
-                        // onClick={() => copyText("mywebsite.com")}
+                        onClick={() => handleDelete(item.id)}
                       >
                         DELETE
                       </button>
                     </div>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-secondary">
-                        {item?.totalClicks}
-                      </p>
-                      <HiChartSquareBar size={22} className="text-gray-500" />
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center gap-2 text-secondary">
+                      <p className="font-medium">{item?.totalClicks}</p>
+                      <HiChartSquareBar size={22} />
                     </div>
-                    <p className="text-gray-500 text-xs font-medium mb-2">
-                      TOTAL CLICKS
-                    </p>
+                    <p className="text-xs font-medium mb-2">TOTAL CLICKS</p>
                     <Image
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.host}/${item?.shortCode}`}
                       alt="QR Code"
