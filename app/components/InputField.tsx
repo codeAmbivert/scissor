@@ -20,11 +20,11 @@ const InputField = ({
   return (
     <main
       className={`bg-gray-300 border-b-2 py-1 px-2 ${
-        borderColor ? borderColor : "border-primary"
+        borderColor ? borderColor : "border-gray-500"
       }`}
     >
       {label && (
-        <label htmlFor={name} className="text-primary text-xs">
+        <label htmlFor={name} className="text-secondary text-xs">
           {label}
         </label>
       )}

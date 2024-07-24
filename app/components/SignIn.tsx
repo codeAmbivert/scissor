@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
+import { RiseLoader } from "react-spinners";
 
 interface SignInProps {
   open: boolean;
@@ -19,6 +20,7 @@ const SignIn = ({ open, onClose }: SignInProps) => {
   const router = useRouter();
   const [signIn, setSignIn] = useState<boolean>(true);
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,16 +32,12 @@ const SignIn = ({ open, onClose }: SignInProps) => {
   };
 
   const handleSignIn = async () => {
+    setLoading(true);
     try {
-      await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
       const user = auth.currentUser;
       if (user) {
         toast.success("Signed in successfully");
-        console.log(user);
       }
       router.push("/account");
     } catch (err) {
@@ -51,6 +49,7 @@ const SignIn = ({ open, onClose }: SignInProps) => {
         // Handle the case where the error is not an instance of Error
         console.log("An unexpected error occurred", err);
       }
+      setLoading(false);
     }
   };
 
@@ -64,8 +63,6 @@ const SignIn = ({ open, onClose }: SignInProps) => {
       const user = auth.currentUser;
       if (user) {
         toast.success("User created successfully");
-        console.log(user);
-        localStorage.setItem("scissorUser", JSON.stringify(user));
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -125,17 +122,19 @@ const SignIn = ({ open, onClose }: SignInProps) => {
             {signIn && (
               <button
                 onClick={handleSignIn}
+                disabled={loading}
                 className="py-2 px-3 bg-primary rounded font-medium text-sm"
               >
-                Sign in
+                {loading ? <RiseLoader size={5} color="#03142F" /> : "Sign in"}
               </button>
             )}
             {!signIn && (
               <button
+                disabled={loading}
                 onClick={handleSignUp}
                 className="py-2 px-3 bg-primary rounded font-medium text-sm"
               >
-                Sign up
+                {loading ? <RiseLoader size={5} color="#03142F" /> : "Sign up"}
               </button>
             )}
           </div>

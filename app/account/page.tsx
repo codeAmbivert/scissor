@@ -17,6 +17,15 @@ import {
 } from "firebase/firestore";
 import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
+import { Poppins } from "next/font/google";
+import { RiseLoader } from "react-spinners";
+import { LuCopy } from "react-icons/lu";
+import { FaRegTrashAlt } from "react-icons/fa";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+});
 
 interface Link {
   id: string;
@@ -31,10 +40,11 @@ const Account = () => {
   const router = useRouter();
   const [createNew, setCreateNew] = useState<boolean>(false);
   const [links, setLinks] = useState<Link[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    auth.onAuthStateChanged((user) => !user && router.push("/"));
-  }, [auth]);
+  // useEffect(() => {
+  //   auth.onAuthStateChanged((user) => !user && router.push("/"));
+  // }, [auth]);
 
   const copyText = async (text: string) => {
     try {
@@ -97,100 +107,131 @@ const Account = () => {
     }
   };
 
-  useEffect(() => {
-    fetchLinks();
-  }, []);
+  // useEffect(() => {
+  //   fetchLinks();
+  // }, []);
 
   console.log(links);
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      console.log({ user });
+      if (!user) {
+        router.push("/");
+      } else {
+        fetchLinks();
+        setLoading(false); // Set loading to false when a user is found
+      }
+    });
+
+    return () => unsubscribe(); // Clean up the subscription
+  }, [auth, router]);
+
+  // if (loading) {
+  //   return <div>Loading...</div>; // Show a loading message or spinner
+  // }
+
   return (
-    <main>
+    <main className={`${poppins.className}`}>
       <ToastContainer />
-      <nav className="p-5 flex justify-between items-center bg-secondary text-white fixed w-full top-0 left-0">
-        <p className="text-2xl font-bold">Scissor</p>
-        <div>
-          <button onClick={() => auth.signOut()}>Logout</button>
+      {loading ? (
+        <div className="min-h-screen flex flex-col items-center justify-center">
+          <RiseLoader color="#56B7BA" />
         </div>
-      </nav>
+      ) : (
+        <div className="">
+          <nav className="p-5 flex justify-between items-center bg-secondary text-white fixed w-full top-0 left-0">
+            <p className="text-2xl font-bold">Scissor</p>
+            <div>
+              <button onClick={() => auth.signOut()}>Logout</button>
+            </div>
+          </nav>
 
-      <div className="max-w-4xl w-full mx-auto py-10 px-5 mt-20">
-        <div className="flex gap-3 items-center">
-          <p className="text-xl font-semibold text-secondary">Links</p>
-          <button
-            onClick={() => setCreateNew(true)}
-            className="bg-primary text-white py-2 px-3 font-medium rounded text-sm"
-          >
-            Create new
-          </button>
-        </div>
+          <div className="max-w-4xl w-full mx-auto py-10 px-5 mt-20">
+            <div className="flex gap-3 items-center">
+              <p className="text-2xl font-semibold text-secondary">Links</p>
+              <button
+                onClick={() => setCreateNew(true)}
+                className="bg-primary text-white py-2 px-3 font-medium rounded "
+              >
+                Create new
+              </button>
+            </div>
 
-        <div className="mt-10">
-          {links.length > 0 &&
-            links
-              .sort(
-                (prvLink, nxtLink) =>
-                  nxtLink.createdAt.toDate().getTime() -
-                  prvLink.createdAt.toDate().getTime()
-              )
-              .map((item, i) => (
-                <div
-                  key={item?.id}
-                  className={`py-5 flex items-center justify-between ${
-                    links.length - 1 !== i && "border-b-2"
-                  } border-gray-200 gap-10 flex-wrap`}
-                >
-                  <div>
-                    <p className="text-gray-500 text-xs uppercase">
-                      CREATED AT{" "}
-                      {format(item?.createdAt.toDate(), "d MMM, HH:mm")}
-                    </p>
-                    <p className="text-lg font-medium text-secondary mt-2">
-                      {item?.name}
-                    </p>
-                    <Link href={`${item?.longUrl}`} className="text-sm">
-                      {item?.longUrl}
-                    </Link>
+            <div className="mt-10">
+              {links.length > 0 &&
+                links
+                  .sort(
+                    (prvLink, nxtLink) =>
+                      nxtLink.createdAt.toDate().getTime() -
+                      prvLink.createdAt.toDate().getTime()
+                  )
+                  .map((item, i) => (
+                    <div
+                      key={item?.id}
+                      className={`py-5 flex items-center justify-between ${
+                        links.length - 1 !== i && "border-b-2"
+                      } border-gray-200 gap-10 flex-wrap`}
+                    >
+                      <div>
+                        <p className="text-gray-500 text-[0.7rem] uppercase">
+                          CREATED AT{" "}
+                          {format(item?.createdAt.toDate(), "d MMM, HH:mm")}
+                        </p>
+                        <p className="text-xl font-medium text-secondary mt-2">
+                          {item?.name}
+                        </p>
+                        <Link href={`${item?.longUrl}`} className="font-light">
+                          {item?.longUrl}
+                        </Link>
 
-                    <div className="flex gap-5 items-center mt-3">
-                      <Link
-                        href={`/${item?.shortCode}`}
-                        className="text-primary text-sm"
-                      >
-                        {window.location.host}/{item?.shortCode}
-                      </Link>
-                      <button
-                        className="border-2 border-primary text-[0.6rem] font-medium rounded-md text-primary py-1 px-3"
-                        onClick={() =>
-                          copyText(`${window.location.host}/${item?.shortCode}`)
-                        }
-                      >
-                        COPY
-                      </button>
-                      <button
-                        className="border-2 border-red-500 text-[0.6rem] font-medium rounded-md text-red-500 py-1 px-3"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        DELETE
-                      </button>
+                        <div className="flex gap-5 items-center mt-3">
+                          <Link
+                            href={`/${item?.shortCode}`}
+                            className="text-primary"
+                          >
+                            {window.location.host}/{item?.shortCode}
+                          </Link>
+                          <button
+                            title="Copy"
+                            className="border-2 border-primary text-[0.6rem] font-medium rounded-md text-primary py-1 px-3"
+                            onClick={() =>
+                              copyText(
+                                `${window.location.host}/${item?.shortCode}`
+                              )
+                            }
+                          >
+                            <LuCopy size={20} />
+                          </button>
+                          <button
+                            title="Delete"
+                            className="border-2 border-red-500 text-[0.6rem] font-medium rounded-md text-red-500 py-1 px-3"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <FaRegTrashAlt size={20} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="flex items-center gap-2 text-secondary">
+                          <p className="font-medium">{item?.totalClicks}</p>
+                          <HiChartSquareBar size={22} />
+                        </div>
+                        <p className="text-xs font-medium mb-2">TOTAL CLICKS</p>
+                        <Image
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.host}/${item?.shortCode}`}
+                          alt="QR Code"
+                          height={100}
+                          width={100}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-center gap-2 text-secondary">
-                      <p className="font-medium">{item?.totalClicks}</p>
-                      <HiChartSquareBar size={22} />
-                    </div>
-                    <p className="text-xs font-medium mb-2">TOTAL CLICKS</p>
-                    <Image
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.host}/${item?.shortCode}`}
-                      alt="QR Code"
-                      height={100}
-                      width={100}
-                    />
-                  </div>
-                </div>
-              ))}
+                  ))}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
       <ShortenUrlModal
         open={createNew}
         onClose={setCreateNew}

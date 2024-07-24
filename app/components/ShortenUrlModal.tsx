@@ -46,7 +46,11 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
   const handleSubmit = async () => {
     let link = {
       name: formData.name,
-      longUrl: formData.longUrl,
+      longUrl:
+        formData.longUrl.includes("http://") ||
+        formData.longUrl.includes("https://")
+          ? formData.longUrl
+          : `http://${formData.longUrl}`,
       createdAt: Timestamp.now(),
       shortCode: nanoid(5),
       totalClicks: 0,
