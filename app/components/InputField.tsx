@@ -4,6 +4,7 @@ interface InputProps {
   type?: string;
   placeholder?: string;
   value?: any;
+  error?: string;
   borderColor?: string;
   onChange: (value: any) => void;
 }
@@ -15,28 +16,36 @@ const InputField = ({
   placeholder,
   value,
   borderColor,
+  error = "",
   onChange,
 }: InputProps) => {
   return (
-    <main
-      className={`bg-gray-300 border-b-2 py-1 px-2 ${
-        borderColor ? borderColor : "border-gray-500"
-      }`}
-    >
-      {label && (
-        <label htmlFor={name} className="text-secondary text-xs">
-          {label}
-        </label>
-      )}
-      <input
-        id={name}
-        name={name}
-        type={type || "text"}
-        value={value}
-        placeholder={placeholder}
-        className="w-full border-none focus:outline-none text-black bg-transparent"
-        onChange={onChange}
-      />
+    <main>
+      <div
+        className={`bg-gray-300 border-b-2 py-1 px-2 ${
+          error.length > 1
+            ? "border-red-700"
+            : borderColor
+            ? borderColor
+            : "border-gray-500"
+        }`}
+      >
+        {label && (
+          <label htmlFor={name} className="text-secondary text-xs">
+            {label}
+          </label>
+        )}
+        <input
+          id={name}
+          name={name}
+          type={type || "text"}
+          value={value}
+          placeholder={placeholder}
+          className="w-full border-none focus:outline-none text-black bg-transparent"
+          onChange={onChange}
+        />
+      </div>
+      {error && <p className="text-red-700 text-xs mt-1">{error}</p>}
     </main>
   );
 };

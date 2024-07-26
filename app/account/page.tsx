@@ -21,6 +21,7 @@ import { Poppins } from "next/font/google";
 import { RiseLoader } from "react-spinners";
 import { LuCopy } from "react-icons/lu";
 import { FaRegTrashAlt } from "react-icons/fa";
+import axios from "axios";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -86,24 +87,46 @@ const Account = () => {
     }
   };
 
-  const handleDelete = async (linkId: string) => {
-    if (auth.currentUser) {
-      const userDocRef = doc(firestore, "users", auth.currentUser.uid);
-      const linkDocRef = doc(userDocRef, "links", linkId);
+  const handleDelete = async (linkId: string, linkName: string) => {
+    if (window.confirm(`Are you sure you want to delete ${linkName}`)) {
+      if (auth.currentUser) {
+        const userDocRef = doc(firestore, "users", auth.currentUser.uid);
+        const linkDocRef = doc(userDocRef, "links", linkId);
+        deleteDoc(linkDocRef)
+          .then((docRef) => {
+            console.log("Document deleted", docRef);
+            // refresh();
+            // handleClose();
+            toast.success("Link deleted successfully");
+            setTimeout(() => {
+              fetchLinks();
+            }, 1000);
+          })
+          .catch((error) => {
+            console.error("Error deleting document: ", error);
+          });
+      }
+    }
+  };
 
-      deleteDoc(linkDocRef)
-        .then((docRef) => {
-          console.log("Document deleted", docRef);
-          // refresh();
-          // handleClose();
-          toast.success("Link deleted successfully");
-          setTimeout(() => {
-            fetchLinks();
-          }, 1000);
-        })
-        .catch((error) => {
-          console.error("Error deleting document: ", error);
-        });
+  const downloadImage = async (url: string, name: string) => {
+    try {
+      const response = await axios.get(url, { responseType: "blob" });
+      const blob = response.data;
+      const objectUrl = URL.createObjectURL(blob);
+
+      // Trigger the download
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = name; // Set the name of the downloaded file
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error("Error downloading image: ", error);
     }
   };
 
@@ -159,7 +182,7 @@ const Account = () => {
             </div>
 
             <div className="mt-10">
-              {links.length > 0 &&
+              {links.length > 0 ? (
                 links
                   .sort(
                     (prvLink, nxtLink) =>
@@ -174,16 +197,16 @@ const Account = () => {
                       } border-gray-200 gap-10 flex-wrap`}
                     >
                       <div>
-                        <p className="text-gray-500 text-[0.7rem] uppercase">
+                        <p className="text-gray-500 text-[0.65rem] font-semibold uppercase">
                           CREATED AT{" "}
                           {format(item?.createdAt.toDate(), "d MMM, HH:mm")}
                         </p>
-                        <p className="text-xl font-medium text-secondary mt-2">
+                        <p className="text-xl font-semibold text-secondary mt-2">
                           {item?.name}
                         </p>
-                        <Link href={`${item?.longUrl}`} className="font-light">
+                        <p className="font-light max-w-[16rem] overflow-hidden overflow-ellipsis">
                           {item?.longUrl}
-                        </Link>
+                        </p>
 
                         <div className="flex gap-5 items-center mt-3">
                           <Link
@@ -194,39 +217,65 @@ const Account = () => {
                           </Link>
                           <button
                             title="Copy"
-                            className="border-2 border-primary text-[0.6rem] font-medium rounded-md text-primary py-1 px-3"
+                            className="border-2 border-primary font-medium rounded-md text-primary py-1 px-2"
                             onClick={() =>
                               copyText(
                                 `${window.location.host}/${item?.shortCode}`
                               )
                             }
                           >
-                            <LuCopy size={20} />
+                            <LuCopy size={15} />
                           </button>
                           <button
                             title="Delete"
-                            className="border-2 border-red-500 text-[0.6rem] font-medium rounded-md text-red-500 py-1 px-3"
-                            onClick={() => handleDelete(item.id)}
+                            className="border-2 border-red-700 font-medium rounded-md text-red-700 py-1 px-2"
+                            onClick={() => handleDelete(item?.id, item?.name)}
                           >
-                            <FaRegTrashAlt size={20} />
+                            <FaRegTrashAlt size={15} />
                           </button>
                         </div>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <div className="flex items-center gap-2 text-secondary">
-                          <p className="font-medium">{item?.totalClicks}</p>
-                          <HiChartSquareBar size={22} />
+                      <div className="flex flex-row-reverse sm:flex-col items-center gap-5 sm:gap-0">
+                        <div>
+                          <div className="flex items-center gap-2 text-secondary">
+                            <p className="font-medium">{item?.totalClicks}</p>
+                            <HiChartSquareBar size={22} />
+                          </div>
+                          <p className="text-xs font-medium mb-2">
+                            TOTAL CLICKS
+                          </p>
                         </div>
-                        <p className="text-xs font-medium mb-2">TOTAL CLICKS</p>
-                        <Image
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.host}/${item?.shortCode}`}
-                          alt="QR Code"
-                          height={100}
-                          width={100}
-                        />
+                        <button
+                          onClick={() =>
+                            downloadImage(
+                              `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${window.location.host}/${item?.shortCode}`,
+                              item?.name
+                            )
+                          }
+                          title="Click to download"
+                          className="cursor-pointer"
+                        >
+                          <Image
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.host}/${item?.shortCode}`}
+                            alt="QR Code"
+                            height={100}
+                            width={100}
+                          />
+                        </button>
                       </div>
                     </div>
-                  ))}
+                  ))
+              ) : (
+                <div className="h-80 flex flex-col justify-center items-center">
+                  <Image
+                    src="/empty.svg"
+                    alt="Empty"
+                    width={200}
+                    height={200}
+                  />
+                  <p className="mt-10 text-xl font-semibold">No Links Yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

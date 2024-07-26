@@ -21,57 +21,85 @@ const SignIn = ({ open, onClose }: SignInProps) => {
   const [signIn, setSignIn] = useState<boolean>(true);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState<boolean>(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(name);
+
     setFormData({
       ...formData,
       [name]: value,
     });
+    setErrors({});
   };
 
   const handleSignIn = async () => {
-    setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      const user = auth.currentUser;
-      if (user) {
-        toast.success("Signed in successfully");
-      }
-      router.push("/account");
-    } catch (err) {
-      if (err instanceof Error) {
-        // Type guard to narrow down the type
-        toast.error(err.message);
-        console.log(err);
-      } else {
-        // Handle the case where the error is not an instance of Error
-        console.log("An unexpected error occurred", err);
-      }
-      setLoading(false);
-    }
-  };
+    let newErrors: { email?: string; password?: string } = {};
 
-  const handleSignUp = async () => {
-    try {
-      await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-      const user = auth.currentUser;
-      if (user) {
-        toast.success("User created successfully");
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Email is not valid";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return null;
+
+    if (signIn) {
+      setLoading(true);
+      try {
+        await signInWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+        const user = auth.currentUser;
+        if (user) {
+          toast.success("Signed in successfully");
+        }
+        router.push("/account");
+      } catch (err) {
+        if (err instanceof Error) {
+          // Type guard to narrow down the type
+          toast.error(err.message);
+          console.log(err);
+        } else {
+          // Handle the case where the error is not an instance of Error
+          console.log("An unexpected error occurred", err);
+        }
+        setLoading(false);
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        // Type guard to narrow down the type
-        toast.error(err.message);
-        console.log(err);
-      } else {
-        // Handle the case where the error is not an instance of Error
-        console.log("An unexpected error occurred", err);
+    } else {
+      setLoading(true);
+      try {
+        await createUserWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+        const user = auth.currentUser;
+        if (user) {
+          toast.success("User created successfully");
+        }
+        router.push("/account");
+      } catch (err) {
+        if (err instanceof Error) {
+          // Type guard to narrow down the type
+          toast.error(err.message);
+          console.log(err);
+        } else {
+          // Handle the case where the error is not an instance of Error
+          console.log("An unexpected error occurred", err);
+        }
+        setLoading(false);
       }
     }
   };
@@ -88,7 +116,10 @@ const SignIn = ({ open, onClose }: SignInProps) => {
           <IoClose
             size={20}
             className="ml-auto cursor-pointer text-black"
-            onClick={() => onClose(false)}
+            onClick={() => {
+              setFormData({ email: "", password: "" });
+              onClose(false);
+            }}
           />
         </div>
 
@@ -96,12 +127,14 @@ const SignIn = ({ open, onClose }: SignInProps) => {
           name="email"
           label="Email"
           value={formData.email}
+          error={errors.email}
           onChange={handleInput}
         />
         <InputField
           name="password"
           label="Password"
           value={formData.password}
+          error={errors.password}
           onChange={handleInput}
         />
         <div className="flex justify-between items-end ">
@@ -125,16 +158,16 @@ const SignIn = ({ open, onClose }: SignInProps) => {
                 disabled={loading}
                 className="py-2 px-3 bg-primary rounded font-medium text-sm"
               >
-                {loading ? <RiseLoader size={5} color="#03142F" /> : "Sign in"}
+                {loading ? <RiseLoader size={5} color="#FFFFFF" /> : "Sign in"}
               </button>
             )}
             {!signIn && (
               <button
                 disabled={loading}
-                onClick={handleSignUp}
+                onClick={handleSignIn}
                 className="py-2 px-3 bg-primary rounded font-medium text-sm"
               >
-                {loading ? <RiseLoader size={5} color="#03142F" /> : "Sign up"}
+                {loading ? <RiseLoader size={5} color="#FFFFFF" /> : "Sign up"}
               </button>
             )}
           </div>

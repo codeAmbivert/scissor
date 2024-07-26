@@ -27,7 +27,7 @@ const LinkRedirect = () => {
         const userDocRef = doc(firestore, "users", userUid);
         const linkDocRef = doc(userDocRef, "links", linkId);
         await updateDoc(linkDocRef, {
-          totalClicks: increment(1), // Assuming you want to increment by 1
+          totalClicks: increment(0.5), // Assuming you want to increment by 1
         });
 
         router.push(longUrl);

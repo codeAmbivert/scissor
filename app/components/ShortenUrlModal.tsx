@@ -15,6 +15,7 @@ import { firestore } from "../firebase";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 import Image from "next/image";
+import { RiseLoader } from "react-spinners";
 
 interface ShortenUrlProps {
   open: boolean;
@@ -23,10 +24,11 @@ interface ShortenUrlProps {
 }
 
 const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
-  const [formData, setFormData] = useState({ name: "", longUrl: "" });
-  const firestore = getFirestore();
-  const [img, setImg] = useState<string | null>(null);
   const auth = getAuth();
+  const firestore = getFirestore();
+  const [formData, setFormData] = useState({ name: "", longUrl: "" });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errors, setErrors] = useState<{ name?: string; longUrl?: string }>({});
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,22 +37,39 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
       ...formData,
       [name]: value,
     });
+    setErrors({});
   };
   console.log("nanoid", nanoid(5));
 
   const handleClose = () => {
     setFormData({ name: "", longUrl: "" });
+    setErrors({});
     onClose(false);
   };
 
   const handleSubmit = async () => {
+    let newErrors: { name?: string; longUrl?: string } = {};
+
+    const urlRegex =
+      /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    if (formData.name.trim().length < 1 || formData.name.trim().length > 15) {
+      newErrors.name = "Name should be between 1 and 15 characters";
+    }
+    if (!urlRegex.test(formData.longUrl)) {
+      newErrors.longUrl = "Enter a valid url";
+    }
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some((error) => error)) return null;
+
+    setLoading(true);
     let link = {
-      name: formData.name,
+      name: formData.name.trim(),
       longUrl:
         formData.longUrl.includes("http://") ||
         formData.longUrl.includes("https://")
           ? formData.longUrl
-          : `http://${formData.longUrl}`,
+          : `http://${formData.longUrl.trim()}`,
       createdAt: Timestamp.now(),
       shortCode: nanoid(5),
       totalClicks: 0,
@@ -62,16 +81,15 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
 
       addDoc(linksCollectionRef, link)
         .then((docRef) => {
-          console.log("Document written with ID: ", docRef.id);
           refresh();
           handleClose();
+          setLoading(false);
         })
         .catch((error) => {
           console.error("Error adding document: ", error);
+          setLoading(false);
         });
     }
-
-    // const resp = await firestore.collection("links").add(link);
   };
 
   if (!open) return null;
@@ -99,12 +117,14 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
           label="Name"
           value={formData.name}
           onChange={handleInput}
+          error={errors.name}
         />
         <InputField
           name="longUrl"
           label="Long URL"
           value={formData.longUrl}
           onChange={handleInput}
+          error={errors.longUrl}
         />
 
         <div className="flex justify-end">
@@ -112,7 +132,11 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
             onClick={handleSubmit}
             className="py-2 px-3 bg-primary rounded font-medium text-sm text-white"
           >
-            Create short URL
+            {loading ? (
+              <RiseLoader size={5} color="#FFFFFF" />
+            ) : (
+              "Create short URL"
+            )}
           </button>
         </div>
       </div>
