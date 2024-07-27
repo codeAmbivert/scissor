@@ -62,20 +62,20 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
 
     if (Object.values(newErrors).some((error) => error)) return null;
 
-    setLoading(true);
-    let link = {
-      name: formData.name.trim(),
-      longUrl:
-        formData.longUrl.includes("http://") ||
-        formData.longUrl.includes("https://")
-          ? formData.longUrl
-          : `http://${formData.longUrl.trim()}`,
-      createdAt: Timestamp.now(),
-      shortCode: nanoid(5),
-      totalClicks: 0,
-    };
-
     if (auth.currentUser) {
+      setLoading(true);
+      let link = {
+        name: formData.name.trim(),
+        longUrl:
+          formData.longUrl.includes("http://") ||
+          formData.longUrl.includes("https://")
+            ? formData.longUrl
+            : `http://${formData.longUrl.trim()}`,
+        createdAt: Timestamp.now(),
+        shortCode: nanoid(5),
+        totalClicks: 0,
+      };
+
       const userDocRef = doc(firestore, "users", auth.currentUser.uid);
       const linksCollectionRef = collection(userDocRef, "links");
 

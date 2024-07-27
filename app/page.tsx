@@ -67,6 +67,7 @@ export default function Home() {
                 alt="Barber"
                 className="hidden md:block"
               />
+              
             </div>
           </div>
 
