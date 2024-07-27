@@ -12,12 +12,12 @@ import {
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyChDMehGRdpmT50FIH0n_7HCLmNsZfQxbk",
-  authDomain: "scissor-c881a.firebaseapp.com",
-  projectId: "scissor-c881a",
-  storageBucket: "scissor-c881a.appspot.com",
-  messagingSenderId: "267037880839",
-  appId: "1:267037880839:web:11144231a2c6f957a2b0a2",
+  apiKey: process.env.NEXT_PUBLIC_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_MESSAGING_SENDER_ID,
+  appId: process.env.APP_ID,
 };
 
 // Initialize Firebase
