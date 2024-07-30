@@ -20,8 +20,11 @@ import { toast, ToastContainer } from "react-toastify";
 import { Poppins } from "next/font/google";
 import { RiseLoader } from "react-spinners";
 import { LuCopy } from "react-icons/lu";
-import { FaRegTrashAlt } from "react-icons/fa";
+import { FaArrowDown, FaRegTrashAlt } from "react-icons/fa";
 import axios from "axios";
+import { IoCloudDownloadOutline } from "react-icons/io5";
+import { MdOutlineEdit } from "react-icons/md";
+import UpdateShortCode from "../components/UpdateShortCode";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -42,6 +45,9 @@ const Account = () => {
   const [createNew, setCreateNew] = useState<boolean>(false);
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [qrOverlay, setQrOverlay] = useState<boolean>(false);
+  const [openEdit, setOpenEdit] = useState<boolean>(false);
+  const [editData, setEditData] = useState({ name: "", id: "" });
 
   // useEffect(() => {
   //   auth.onAuthStateChanged((user) => !user && router.push("/"));
@@ -201,12 +207,21 @@ const Account = () => {
                           CREATED AT{" "}
                           {format(item?.createdAt.toDate(), "d MMM, HH:mm")}
                         </p>
-                        <p className="text-xl font-semibold text-secondary mt-2">
+                        <p className="text-xl font-semibold text-secondary mt-2 capitalize">
                           {item?.name}
                         </p>
-                        <p className="font-light max-w-[16rem] overflow-hidden overflow-ellipsis">
-                          {item?.longUrl}
-                        </p>
+                        <div className="flex gap-5">
+                          <p className="font-light max-w-[16rem] overflow-hidden overflow-ellipsis">
+                            {item?.longUrl}
+                          </p>
+                          <button
+                            title="Delete"
+                            className="border-2 border-red-700 font-medium rounded-md text-red-700 py-1 px-2"
+                            onClick={() => handleDelete(item?.id, item?.name)}
+                          >
+                            <FaRegTrashAlt size={15} />
+                          </button>
+                        </div>
 
                         <div className="flex gap-5 items-center mt-3">
                           <Link
@@ -227,11 +242,14 @@ const Account = () => {
                             <LuCopy size={15} />
                           </button>
                           <button
-                            title="Delete"
-                            className="border-2 border-red-700 font-medium rounded-md text-red-700 py-1 px-2"
-                            onClick={() => handleDelete(item?.id, item?.name)}
+                            title="Copy"
+                            className="border-2 border-blue-500 font-medium rounded-md text-blue-500 py-1 px-2"
+                            onClick={() => {
+                              setOpenEdit(true);
+                              setEditData({ name: item?.name, id: item?.id });
+                            }}
                           >
-                            <FaRegTrashAlt size={15} />
+                            <MdOutlineEdit size={15} />
                           </button>
                         </div>
                       </div>
@@ -245,7 +263,7 @@ const Account = () => {
                             TOTAL CLICKS
                           </p>
                         </div>
-                        <button
+                        <div
                           onClick={() =>
                             downloadImage(
                               `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${window.location.host}/${item?.shortCode}`,
@@ -253,7 +271,9 @@ const Account = () => {
                             )
                           }
                           title="Click to download"
-                          className="cursor-pointer"
+                          className="cursor-pointer overflow-hidden relative"
+                          onMouseEnter={() => setQrOverlay(true)}
+                          onMouseLeave={() => setQrOverlay(false)}
                         >
                           <Image
                             src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.host}/${item?.shortCode}`}
@@ -261,7 +281,14 @@ const Account = () => {
                             height={100}
                             width={100}
                           />
-                        </button>
+                          <div
+                            className={`absolute bg-primary bg-opacity-75 top-0 left-0 h-full w-full flex justify-center items-center transform duration-75 ${
+                              qrOverlay ? "translate-y-0" : "-translate-y-full"
+                            }`}
+                          >
+                            <IoCloudDownloadOutline size={40} color="#fff" />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -284,6 +311,13 @@ const Account = () => {
       <ShortenUrlModal
         open={createNew}
         onClose={setCreateNew}
+        refresh={fetchLinks}
+      />
+      <UpdateShortCode
+        open={openEdit}
+        onClose={setOpenEdit}
+        name={editData?.name}
+        id={editData?.id}
         refresh={fetchLinks}
       />
     </main>
