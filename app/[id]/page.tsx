@@ -3,7 +3,16 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { firestore } from "../firebase";
-import { doc, getDoc, increment, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  increment,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { RiseLoader } from "react-spinners";
 
 const Redirect = () => {
@@ -17,15 +26,27 @@ const Redirect = () => {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        let { longUrl, linkId, userUid } = docSnap.data();
+        let { longUrl } = docSnap.data();
+        console.log({ longUrl });
 
-        const userDocRef = doc(firestore, "users", userUid);
-        const linkDocRef = doc(userDocRef, "links", linkId);
-        await updateDoc(linkDocRef, {
-          totalClicks: increment(0.5),
-        });
+        // Query to find all documents with the same longUrl
+        const linksQuery = query(
+          collection(firestore, "links"),
+          where("longUrl", "==", longUrl)
+        );
+        const linksQuerySnapshot = await getDocs(linksQuery);
 
-        router.push(longUrl);
+        // Create an array of promises to update each document
+        const updatePromises = linksQuerySnapshot.docs.map((doc) =>
+          updateDoc(doc.ref, {
+            totalClicks: increment(1),
+          })
+        );
+
+        // Wait for all update operations to complete
+        await Promise.all(updatePromises);
+
+        // router.push(longUrl);
       } else {
         console.log("No such document!");
         setInitialLoad(false);

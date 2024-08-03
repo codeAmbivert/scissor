@@ -16,12 +16,21 @@ exports.linkCreated = functions.firestore
     });
   });
 
-exports.linkDeleted = functions.firestore
+  exports.linkDeleted = functions.firestore
   .document("users/{userUid}/links/{linkId}")
   .onDelete(async (snapshot, context) => {
-    const { shortCode } = snapshot.data();
+    const { longUrl } = snapshot.data();
 
-    return admin.firestore().doc(`links/${shortCode}`).delete();
+    // Query to find all documents with the same longUrl
+    const linksQuerySnapshot = await admin.firestore().collection('links')
+      .where('longUrl', '==', longUrl)
+      .get();
+
+    // Create an array of promises to delete each document
+    const deletePromises = linksQuerySnapshot.docs.map(doc => doc.ref.delete());
+
+    // Wait for all delete operations to complete
+    return Promise.all(deletePromises);
   });
 
 exports.linkUpdated = functions.firestore

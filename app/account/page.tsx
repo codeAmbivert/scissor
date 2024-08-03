@@ -46,6 +46,7 @@ const Account = () => {
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [qrOverlay, setQrOverlay] = useState<boolean>(false);
+  const [qrId, setQrId] = useState<string>("");
   const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [editData, setEditData] = useState({ name: "", id: "" });
 
@@ -169,7 +170,7 @@ const Account = () => {
         </div>
       ) : (
         <div className="">
-          <nav className="p-5 flex justify-between items-center bg-secondary text-white fixed w-full top-0 left-0">
+          <nav className="p-5 flex justify-between items-center bg-secondary text-white fixed w-full top-0 left-0 z-50">
             <p className="text-2xl font-bold">Scissor</p>
             <div>
               <button onClick={() => auth.signOut()}>Logout</button>
@@ -272,8 +273,14 @@ const Account = () => {
                           }
                           title="Click to download"
                           className="cursor-pointer overflow-hidden relative"
-                          onMouseEnter={() => setQrOverlay(true)}
-                          onMouseLeave={() => setQrOverlay(false)}
+                          onMouseEnter={() => {
+                            setQrId(item?.id);
+                            setQrOverlay(true);
+                          }}
+                          onMouseLeave={() => {
+                            setQrId("");
+                            setQrOverlay(false);
+                          }}
                         >
                           <Image
                             src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.host}/${item?.shortCode}`}
@@ -283,7 +290,9 @@ const Account = () => {
                           />
                           <div
                             className={`absolute bg-primary bg-opacity-75 top-0 left-0 h-full w-full flex justify-center items-center transform duration-75 ${
-                              qrOverlay ? "translate-y-0" : "-translate-y-full"
+                              qrOverlay && qrId == item?.id
+                                ? "translate-y-0"
+                                : "-translate-y-full"
                             }`}
                           >
                             <IoCloudDownloadOutline size={40} color="#fff" />
