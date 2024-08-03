@@ -125,7 +125,7 @@ const Account = () => {
       // Trigger the download
       const link = document.createElement("a");
       link.href = objectUrl;
-      link.download = name; // Set the name of the downloaded file
+      link.download = `${name} qr code`; // Set the name of the downloaded file
       document.body.appendChild(link);
       link.click();
 
