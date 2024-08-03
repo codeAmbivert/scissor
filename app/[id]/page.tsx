@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { firestore } from "../firebase";
+import { use, useEffect, useState } from "react";
+import { auth, firestore } from "../firebase";
 import {
   collection,
   doc,
@@ -26,7 +26,7 @@ const Redirect = () => {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        let { longUrl } = docSnap.data();
+        let { longUrl, linkId } = docSnap.data();
         console.log({ longUrl });
 
         // Query to find all documents with the same longUrl
@@ -42,6 +42,24 @@ const Redirect = () => {
             totalClicks: increment(1),
           })
         );
+
+        if (auth.currentUser) {
+          const userDocRef = doc(
+            firestore,
+            "users",
+            auth.currentUser.uid,
+            "links",
+            linkId
+          );
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            await updateDoc(userDocRef, {
+              totalClicks: increment(1),
+            });
+          } else {
+            console.log("error");
+          }
+        }
 
         // Wait for all update operations to complete
         await Promise.all(updatePromises);
