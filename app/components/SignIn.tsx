@@ -1,5 +1,5 @@
 import { Input } from "postcss";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoEyeOutline } from "react-icons/io5";
 import InputField from "./InputField";
 import { useState } from "react";
 import { auth } from "../firebase";
@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import { RiseLoader } from "react-spinners";
+import { LuEyeOff } from "react-icons/lu";
 
 interface SignInProps {
   open: boolean;
@@ -21,6 +22,7 @@ const SignIn = ({ open, onClose }: SignInProps) => {
   const [signIn, setSignIn] = useState<boolean>(true);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState<boolean>(false);
+  const [pwrdVisible, setPwrdVisible] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
@@ -133,6 +135,18 @@ const SignIn = ({ open, onClose }: SignInProps) => {
         <InputField
           name="password"
           label="Password"
+          type={pwrdVisible ? "text" : "password"}
+          endIcon={
+            !pwrdVisible ? (
+              <button onClick={() => setPwrdVisible(true)}>
+                <IoEyeOutline />
+              </button>
+            ) : (
+              <button onClick={() => setPwrdVisible(false)}>
+                <LuEyeOff />
+              </button>
+            )
+          }
           value={formData.password}
           error={errors.password}
           onChange={handleInput}

@@ -64,7 +64,7 @@ const Redirect = () => {
         // Wait for all update operations to complete
         await Promise.all(updatePromises);
 
-        // router.push(longUrl);
+        router.push(longUrl);
       } else {
         console.log("No such document!");
         setInitialLoad(false);

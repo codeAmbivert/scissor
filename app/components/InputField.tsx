@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 interface InputProps {
   name: string;
   label?: string;
@@ -5,6 +7,7 @@ interface InputProps {
   placeholder?: string;
   value?: any;
   error?: string;
+  endIcon?: ReactNode;
   borderColor?: string;
   onChange: (value: any) => void;
 }
@@ -16,6 +19,7 @@ const InputField = ({
   placeholder,
   value,
   borderColor,
+  endIcon,
   error = "",
   onChange,
 }: InputProps) => {
@@ -35,15 +39,18 @@ const InputField = ({
             {label}
           </label>
         )}
-        <input
-          id={name}
-          name={name}
-          type={type || "text"}
-          value={value}
-          placeholder={placeholder}
-          className="w-full border-none focus:outline-none text-black bg-transparent"
-          onChange={onChange}
-        />
+        <div className="flex text-secondary items-center">
+          <input
+            id={name}
+            name={name}
+            type={type || "text"}
+            value={value}
+            placeholder={placeholder}
+            className="w-full border-none focus:outline-none text-black bg-transparent"
+            onChange={onChange}
+          />
+          {endIcon && <span>{endIcon}</span>}
+        </div>
       </div>
       {error && <p className="text-red-700 text-xs mt-1">{error}</p>}
     </main>
