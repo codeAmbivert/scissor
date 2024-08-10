@@ -121,6 +121,7 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
         />
         <InputField
           name="longUrl"
+          placeholder="Enter long URL"
           label="Long URL"
           value={formData.longUrl}
           onChange={handleInput}
