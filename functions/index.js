@@ -16,18 +16,22 @@ exports.linkCreated = functions.firestore
     });
   });
 
-  exports.linkDeleted = functions.firestore
+exports.linkDeleted = functions.firestore
   .document("users/{userUid}/links/{linkId}")
   .onDelete(async (snapshot, context) => {
     const { longUrl } = snapshot.data();
 
     // Query to find all documents with the same longUrl
-    const linksQuerySnapshot = await admin.firestore().collection('links')
-      .where('longUrl', '==', longUrl)
+    const linksQuerySnapshot = await admin
+      .firestore()
+      .collection("links")
+      .where("longUrl", "==", longUrl)
       .get();
 
     // Create an array of promises to delete each document
-    const deletePromises = linksQuerySnapshot.docs.map(doc => doc.ref.delete());
+    const deletePromises = linksQuerySnapshot.docs.map((doc) =>
+      doc.ref.delete()
+    );
 
     // Wait for all delete operations to complete
     return Promise.all(deletePromises);
@@ -57,7 +61,6 @@ exports.linkUpdated = functions.firestore
       linkId,
       longUrl: newValue.longUrl,
     });
-    
 
     // Wait for both updates to complete
     return Promise.all([updateOriginalDoc, updateShortCodeDoc]);

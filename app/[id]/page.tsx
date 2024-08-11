@@ -14,6 +14,7 @@ import {
   where,
 } from "firebase/firestore";
 import { RiseLoader } from "react-spinners";
+import Image from "next/image";
 
 const Redirect = () => {
   const router = useRouter();
@@ -81,13 +82,14 @@ const Redirect = () => {
   return (
     <main>
       {initialLoad ? (
-        <div className="min-h-screen flex flex-col items-center justify-center">
-          <RiseLoader color="#56B7BA" />
-          <p className="text-secondary mt-5">Redirecting</p>
-        </div>
+        <div className="bg-primary min-h-screen flex flex-col items-center justify-center">
+        <Image src="/spinner.gif" alt="spinner" width={100} height={100} />
+        <p className="text-white font-medium mt-5">Redirecting...</p>
+      </div>
       ) : (
-        <div className="min-h-screen flex items-center justify-center">
-          Link is invalid
+        <div className="min-h-screen flex flex-col items-center justify-center gap-10">
+          <Image src="not_found.svg" width={200} height={200} alt="Not found" />
+          Link is not valid
         </div>
       )}
     </main>

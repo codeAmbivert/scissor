@@ -17,7 +17,7 @@ import {
 } from "firebase/firestore";
 import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
-import { Poppins } from "next/font/google";
+import { Nunito } from "next/font/google";
 import { RiseLoader } from "react-spinners";
 import { LuCopy } from "react-icons/lu";
 import { FaArrowDown, FaRegTrashAlt } from "react-icons/fa";
@@ -25,10 +25,11 @@ import axios from "axios";
 import { IoCloudDownloadOutline } from "react-icons/io5";
 import { MdOutlineEdit } from "react-icons/md";
 import UpdateShortCode from "../components/UpdateShortCode";
+import Loading from "../components/Loading";
 
-const poppins = Poppins({
+const nunito = Nunito({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  // weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 interface Link {
@@ -157,52 +158,43 @@ const Account = () => {
     return () => unsubscribe(); // Clean up the subscription
   }, [auth, router]);
 
-  // if (loading) {
-  //   return <div>Loading...</div>; // Show a loading message or spinner
-  // }
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
-    <main className={`${poppins.className}`}>
+    <main className={`${nunito.className}`}>
       <ToastContainer />
-      {loading ? (
-        <div className="min-h-screen flex flex-col items-center justify-center">
-          <RiseLoader color="#56B7BA" />
-        </div>
-      ) : (
-        <div className="">
-          <nav className="p-5 flex justify-between items-center bg-secondary text-white fixed w-full top-0 left-0 z-50">
-            <p className="text-2xl font-bold">Scissor</p>
-            <div>
-              <button onClick={() => auth.signOut()}>Logout</button>
-            </div>
-          </nav>
+      <div className="">
+        <nav className="p-5 py-8 flex justify-between items-center bg-primary text-white fixed w-full top-0 left-0 z-50">
+          <p className="text-2xl font-bold">Cutt.live</p>
+          <div>
+            <button onClick={() => auth.signOut()}>Logout</button>
+          </div>
+        </nav>
 
-          <div className="max-w-4xl w-full mx-auto py-10 px-5 mt-20">
-            <div className="flex gap-3 items-center">
-              <p className="text-2xl font-semibold text-secondary">Links</p>
-              <button
-                onClick={() => setCreateNew(true)}
-                className="bg-primary text-white py-2 px-3 font-medium rounded "
-              >
-                Create new
-              </button>
-            </div>
+        <div className="max-w-4xl w-full mx-auto py-10 px-5 sm:px-10 mt-20 shadow-xl min-h-screen">
+          <div className="flex gap-3 items-center">
+            <p className="text-2xl font-semibold text-secondary">Links</p>
+            <button
+              onClick={() => setCreateNew(true)}
+              className="bg-primary text-white py-2 px-3 font-medium rounded "
+            >
+              Create new
+            </button>
+          </div>
 
-            <div className="mt-10">
-              {links.length > 0 ? (
-                links
-                  .sort(
-                    (prvLink, nxtLink) =>
-                      nxtLink.createdAt.toDate().getTime() -
-                      prvLink.createdAt.toDate().getTime()
-                  )
-                  .map((item, i) => (
-                    <div
-                      key={item?.id}
-                      className={`py-5 flex items-center justify-between ${
-                        links.length - 1 !== i && "border-b-2"
-                      } border-gray-200 gap-10 flex-wrap`}
-                    >
+          <div className="mt-10 flex flex-col gap-5 sm:gap-10 h-full">
+            {links.length > 0 ? (
+              links
+                .sort(
+                  (prvLink, nxtLink) =>
+                    nxtLink.createdAt.toDate().getTime() -
+                    prvLink.createdAt.toDate().getTime()
+                )
+                .map((item, i) => (
+                  <div key={item?.id} className={`p-5 rounded-xl bg-[#F7F9FB]`}>
+                    <div className="flex items-center justify-between flex-wrap">
                       <div>
                         <p className="text-gray-500 text-[0.65rem] font-semibold uppercase">
                           CREATED AT{" "}
@@ -215,13 +207,6 @@ const Account = () => {
                           <p className="font-light max-w-[16rem] overflow-hidden overflow-ellipsis">
                             {item?.longUrl}
                           </p>
-                          <button
-                            title="Delete"
-                            className="border-2 border-red-700 font-medium rounded-md text-red-700 py-1 px-2"
-                            onClick={() => handleDelete(item?.id, item?.name)}
-                          >
-                            <FaRegTrashAlt size={15} />
-                          </button>
                         </div>
 
                         <div className="flex gap-5 items-center mt-3">
@@ -240,7 +225,7 @@ const Account = () => {
                               )
                             }
                           >
-                            <LuCopy size={15} />
+                            <LuCopy size={10} />
                           </button>
                           <button
                             title="Copy"
@@ -250,20 +235,11 @@ const Account = () => {
                               setEditData({ name: item?.name, id: item?.id });
                             }}
                           >
-                            <MdOutlineEdit size={15} />
+                            <MdOutlineEdit size={10} />
                           </button>
                         </div>
                       </div>
-                      <div className="flex flex-row-reverse sm:flex-col items-center gap-5 sm:gap-0">
-                        <div>
-                          <div className="flex items-center gap-2 text-secondary">
-                            <p className="font-medium">{item?.totalClicks}</p>
-                            <HiChartSquareBar size={22} />
-                          </div>
-                          <p className="text-xs font-medium mb-2">
-                            TOTAL CLICKS
-                          </p>
-                        </div>
+                      <div className="flex sm:flex-col sm:items-center gap-5 mt-3 sm:mt-0 sm:gap-0">
                         <div
                           onClick={() =>
                             downloadImage(
@@ -298,24 +274,35 @@ const Account = () => {
                             <IoCloudDownloadOutline size={40} color="#fff" />
                           </div>
                         </div>
+                        <div>
+                          <div className="flex items-center gap-2 text-secondary mt-3">
+                            <p className="font-medium">{item?.totalClicks}</p>
+                            <HiChartSquareBar size={22} />
+                            <button
+                              title="Delete"
+                              className="border-2 border-red-700 font-medium rounded-md text-red-700 py-1 px-2 ml-auto"
+                              onClick={() => handleDelete(item?.id, item?.name)}
+                            >
+                              <FaRegTrashAlt size={10} />
+                            </button>
+                          </div>
+                          <p className="text-xs font-medium mb-2">
+                            TOTAL CLICKS
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  ))
-              ) : (
-                <div className="h-80 flex flex-col justify-center items-center">
-                  <Image
-                    src="/empty.svg"
-                    alt="Empty"
-                    width={200}
-                    height={200}
-                  />
-                  <p className="mt-10 text-xl font-semibold">No Links Yet</p>
-                </div>
-              )}
-            </div>
+                  </div>
+                ))
+            ) : (
+              <div className="h-full w-full flex flex-col justify-center items-center">
+                <Image src="/empty.svg" alt="Empty" width={200} height={200} />
+                <p className="mt-10 text-xl font-semibold">No Links Yet</p>
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       <ShortenUrlModal
         open={createNew}
