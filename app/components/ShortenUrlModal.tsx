@@ -1,4 +1,3 @@
-import { Input } from "postcss";
 import { IoClose } from "react-icons/io5";
 import InputField from "./InputField";
 import { ToastContainer, toast } from "react-toastify";
@@ -39,7 +38,6 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
     });
     setErrors({});
   };
-  console.log("nanoid", nanoid(5));
 
   const handleClose = () => {
     setFormData({ name: "", longUrl: "" });

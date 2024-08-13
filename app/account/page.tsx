@@ -22,10 +22,12 @@ import { RiseLoader } from "react-spinners";
 import { LuCopy } from "react-icons/lu";
 import { FaArrowDown, FaRegTrashAlt } from "react-icons/fa";
 import axios from "axios";
-import { IoCloudDownloadOutline } from "react-icons/io5";
+import { IoCloudDownloadOutline, IoLogOutOutline } from "react-icons/io5";
 import { MdOutlineEdit } from "react-icons/md";
 import UpdateShortCode from "../components/UpdateShortCode";
 import Loading from "../components/Loading";
+import { FaRegCircleUser } from "react-icons/fa6";
+import ChangePasswordModal from "../components/ChangePasswordModal";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -49,6 +51,8 @@ const Account = () => {
   const [qrOverlay, setQrOverlay] = useState<boolean>(false);
   const [qrId, setQrId] = useState<string>("");
   const [openEdit, setOpenEdit] = useState<boolean>(false);
+  const [openUser, setOpenUser] = useState<boolean>(false);
+  const [openChangePassword, setOpenChangePassword] = useState<boolean>(false);
   const [editData, setEditData] = useState({ name: "", id: "" });
 
   // useEffect(() => {
@@ -166,14 +170,44 @@ const Account = () => {
     <main className={`${nunito.className}`}>
       <ToastContainer />
       <div className="">
-        <nav className="p-5 py-8 flex justify-between items-center bg-primary text-white fixed w-full top-0 left-0 z-50">
-          <p className="text-2xl font-bold">Cutt.live</p>
-          <div>
-            <button onClick={() => auth.signOut()}>Logout</button>
+        <nav className=" bg-primary text-white fixed w-full top-0 left-0 z-50">
+          <div className="p-5 py-8 flex justify-between items-center max-w-7xl mx-auto">
+            <p className="text-2xl font-bold">Cutt.live</p>
+            <div>
+              <FaRegCircleUser
+                size={30}
+                className="cursor-pointer"
+                onClick={() => setOpenUser(true)}
+              />
+
+              <div
+                className={`fixed top-0 left-0 h-full w-full p-5 ${
+                  openUser ? "block" : "hidden"
+                }`}
+                onClick={() => setOpenUser(false)}
+              >
+                <div className="flex justify-end pt-12">
+                  <div className="w-52 bg-white p-2 rounded-xl border flex flex-col">
+                    <button
+                      className="text-black text-start p-3 hover:bg-indigo-400 rounded-lg hover:text-white flex gap-1 items-center"
+                      onClick={() => setOpenChangePassword(true)}
+                    >
+                      Change Password
+                    </button>
+                    <button
+                      className="text-black text-start p-3 hover:bg-indigo-400 rounded-lg hover:text-white flex gap-1 items-center"
+                      onClick={() => auth.signOut()}
+                    >
+                      Logout <IoLogOutOutline size={20} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </nav>
 
-        <div className="max-w-4xl w-full mx-auto py-10 px-5 sm:px-10 mt-20 shadow-xl min-h-screen">
+        <div className="max-w-7xl w-full mx-auto py-10 px-5 sm:px-10 mt-20 shadow-xl min-h-screen">
           <div className="flex gap-3 items-center">
             <p className="text-2xl font-semibold text-secondary">Links</p>
             <button
@@ -315,6 +349,10 @@ const Account = () => {
         name={editData?.name}
         id={editData?.id}
         refresh={fetchLinks}
+      />
+      <ChangePasswordModal
+        open={openChangePassword}
+        onClose={setOpenChangePassword}
       />
     </main>
   );

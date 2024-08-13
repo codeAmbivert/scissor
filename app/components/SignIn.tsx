@@ -1,4 +1,3 @@
-import { Input } from "postcss";
 import { IoClose, IoEyeOutline } from "react-icons/io5";
 import InputField from "./InputField";
 import { useState } from "react";
@@ -9,8 +8,8 @@ import {
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
-import { RiseLoader } from "react-spinners";
 import { LuEyeOff } from "react-icons/lu";
+import Image from "next/image";
 
 interface SignInProps {
   open: boolean;
@@ -20,12 +19,18 @@ interface SignInProps {
 const SignIn = ({ open, onClose }: SignInProps) => {
   const router = useRouter();
   const [signIn, setSignIn] = useState<boolean>(true);
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const [pwrdVisible, setPwrdVisible] = useState<boolean>(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
-  );
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -80,6 +85,10 @@ const SignIn = ({ open, onClose }: SignInProps) => {
         setLoading(false);
       }
     } else {
+      if (formData.password !== formData.confirmPassword) {
+        setErrors({ confirmPassword: "Passwords do not match" });
+        return null;
+      }
       setLoading(true);
       try {
         await createUserWithEmailAndPassword(
@@ -119,7 +128,7 @@ const SignIn = ({ open, onClose }: SignInProps) => {
             size={20}
             className="ml-auto cursor-pointer text-black"
             onClick={() => {
-              setFormData({ email: "", password: "" });
+              setFormData({ email: "", password: "", confirmPassword: "" });
               onClose(false);
             }}
           />
@@ -128,6 +137,7 @@ const SignIn = ({ open, onClose }: SignInProps) => {
         <InputField
           name="email"
           label="Email"
+          placeholder="use@example.com"
           value={formData.email}
           error={errors.email}
           onChange={handleInput}
@@ -135,6 +145,7 @@ const SignIn = ({ open, onClose }: SignInProps) => {
         <InputField
           name="password"
           label="Password"
+          placeholder="********"
           type={pwrdVisible ? "text" : "password"}
           endIcon={
             !pwrdVisible ? (
@@ -151,17 +162,45 @@ const SignIn = ({ open, onClose }: SignInProps) => {
           error={errors.password}
           onChange={handleInput}
         />
-        <div className="flex justify-between items-end ">
+        {!signIn && (
+          <InputField
+            name="confirmPassword"
+            label="Confirm Password"
+            placeholder="********"
+            type={pwrdVisible ? "text" : "password"}
+            endIcon={
+              !pwrdVisible ? (
+                <button onClick={() => setPwrdVisible(true)}>
+                  <IoEyeOutline />
+                </button>
+              ) : (
+                <button onClick={() => setPwrdVisible(false)}>
+                  <LuEyeOff />
+                </button>
+              )
+            }
+            value={formData.confirmPassword}
+            error={errors.confirmPassword}
+            onChange={handleInput}
+          />
+        )}
+        <div className="flex justify-between items-end">
           <div className="text-black text-sm">
             {signIn && (
-              <button onClick={() => setSignIn(false)}>
-                Don&apos;t have an account?
-              </button>
+              <div onClick={() => setSignIn(false)}>
+                Don&apos;t have an account?{" "}
+                <span className="font-medium text-primary text-start whitespace-nowrap">
+                  Sign up
+                </span>
+              </div>
             )}
             {!signIn && (
-              <button onClick={() => setSignIn(true)}>
-                Already have an account?
-              </button>
+              <div onClick={() => setSignIn(true)}>
+                Already have an account?{" "}
+                <span className="font-medium text-primary text-start whitespace-nowrap">
+                  Sign in
+                </span>
+              </div>
             )}
           </div>
 
@@ -170,18 +209,36 @@ const SignIn = ({ open, onClose }: SignInProps) => {
               <button
                 onClick={handleSignIn}
                 disabled={loading}
-                className="py-2 px-3 bg-primary rounded font-medium text-sm"
+                className="py-2 px-3 bg-primary rounded font-medium text-sm text-white"
               >
-                {loading ? <RiseLoader size={5} color="#FFFFFF" /> : "Sign in"}
+                {loading ? (
+                  <Image
+                    alt="loading"
+                    src="/spinner.gif"
+                    height={20}
+                    width={20}
+                  />
+                ) : (
+                  "Sign up"
+                )}
               </button>
             )}
             {!signIn && (
               <button
                 disabled={loading}
                 onClick={handleSignIn}
-                className="py-2 px-3 bg-primary rounded font-medium text-sm"
+                className="py-2 px-3 bg-primary rounded font-medium text-sm text-white"
               >
-                {loading ? <RiseLoader size={5} color="#FFFFFF" /> : "Sign up"}
+                {loading ? (
+                  <Image
+                    alt="loading"
+                    src="/spinner.gif"
+                    height={20}
+                    width={20}
+                  />
+                ) : (
+                  "Sign up"
+                )}
               </button>
             )}
           </div>
