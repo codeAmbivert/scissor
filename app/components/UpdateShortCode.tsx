@@ -79,6 +79,7 @@ const UpdateShortCode = ({
   if (!open) return null;
   return (
     <div
+    title="modal"
       onClick={handleClose}
       className="fixed h-full w-full top-0 left-0 flex justify-center items-center bg-black bg-opacity-20 p-5"
     >
@@ -91,11 +92,14 @@ const UpdateShortCode = ({
           <p className="text-black text-lg font-medium">
             Update {name}&apos;s short URL
           </p>
+          <button title="close" onClick={handleClose}>
+
           <IoClose
             size={20}
             className="ml-auto cursor-pointer text-black"
-            onClick={handleClose}
-          />
+            
+            />
+            </button>
         </div>
 
         {/* <InputField
