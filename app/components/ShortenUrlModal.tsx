@@ -135,7 +135,7 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
             {loading ? (
               <RiseLoader size={5} color="#FFFFFF" />
             ) : (
-              "Create short URL"
+              "Submit"
             )}
           </button>
         </div>
