@@ -17,6 +17,18 @@ interface PasswoedModalProps {
   onClose: (value: boolean) => void;
 }
 
+export const reauthenticateUser = (currentPassword: string) => {
+  const user = auth.currentUser;
+  if (user && user.email) {
+    const credential = EmailAuthProvider.credential(
+      user.email,
+      currentPassword
+    );
+    return reauthenticateWithCredential(user, credential);
+  }
+  return Promise.reject(new Error("No user is currently signed in."));
+};
+
 const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
   const [pwrdVisible, setPwrdVisible] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -43,18 +55,6 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
     onClose(false);
   };
 
-  const reauthenticateUser = (currentPassword: string) => {
-    const user = auth.currentUser;
-    if (user && user.email) {
-      const credential = EmailAuthProvider.credential(
-        user.email,
-        currentPassword
-      );
-      return reauthenticateWithCredential(user, credential);
-    }
-    return Promise.reject(new Error("No user is currently signed in."));
-  };
-
   const handleChangePassword = async () => {
     if (formData.newPassword !== formData.confirmPassword) {
       setErrors("Passwords do not match");
@@ -71,16 +71,18 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
           setLoading(false);
         }, 2000);
       }
-    } catch (error) {
+    } catch (error:any) {
       console.log("code1", error?.code);
-      if (error?.code === "auth/wrong-password") {
-        toast.error("Error updating password: Wrong password");
-      } else {
-        toast.error("Error updating password: Try again later");
+      if (error) {
+        if (error?.code === "auth/wrong-password") {
+          toast.error("Error updating password: Wrong password");
+        } else {
+          toast.error("Error updating password: Try again later");
+        }
+        setTimeout(() => {
+          setLoading(false);
+        }, 2000);
       }
-      setTimeout(() => {
-        setLoading(false);
-      }, 2000);
     }
   };
 
@@ -112,16 +114,16 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
             placeholder="********"
             type={pwrdVisible ? "text" : "password"}
             endIcon={
-            !pwrdVisible ? (
-              <button onClick={() => setPwrdVisible(true)}>
-                <IoEyeOutline />
-              </button>
-            ) : (
-              <button onClick={() => setPwrdVisible(false)}>
-                <LuEyeOff />
-              </button>
-            )
-          }
+              !pwrdVisible ? (
+                <button onClick={() => setPwrdVisible(true)}>
+                  <IoEyeOutline />
+                </button>
+              ) : (
+                <button onClick={() => setPwrdVisible(false)}>
+                  <LuEyeOff />
+                </button>
+              )
+            }
             onChange={handleInput}
           />
           <InputField
@@ -131,16 +133,16 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
             placeholder="********"
             type={pwrdVisible ? "text" : "password"}
             endIcon={
-            !pwrdVisible ? (
-              <button onClick={() => setPwrdVisible(true)}>
-                <IoEyeOutline />
-              </button>
-            ) : (
-              <button onClick={() => setPwrdVisible(false)}>
-                <LuEyeOff />
-              </button>
-            )
-          }
+              !pwrdVisible ? (
+                <button onClick={() => setPwrdVisible(true)}>
+                  <IoEyeOutline />
+                </button>
+              ) : (
+                <button onClick={() => setPwrdVisible(false)}>
+                  <LuEyeOff />
+                </button>
+              )
+            }
             onChange={handleInput}
           />
           <InputField
@@ -150,16 +152,16 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
             placeholder="********"
             type={pwrdVisible ? "text" : "password"}
             endIcon={
-            !pwrdVisible ? (
-              <button onClick={() => setPwrdVisible(true)}>
-                <IoEyeOutline />
-              </button>
-            ) : (
-              <button onClick={() => setPwrdVisible(false)}>
-                <LuEyeOff />
-              </button>
-            )
-          }
+              !pwrdVisible ? (
+                <button onClick={() => setPwrdVisible(true)}>
+                  <IoEyeOutline />
+                </button>
+              ) : (
+                <button onClick={() => setPwrdVisible(false)}>
+                  <LuEyeOff />
+                </button>
+              )
+            }
             onChange={handleInput}
             error={errors}
           />
@@ -169,7 +171,13 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
             className="p-2 bg-primary text-white rounded-lg mt-5"
           >
             {loading ? (
-              <Image alt="loading" src="/spinner.gif" height={20} width={20} className="mx-auto" />
+              <Image
+                alt="loading"
+                src="/spinner.gif"
+                height={20}
+                width={20}
+                className="mx-auto"
+              />
             ) : (
               "Change Password"
             )}
