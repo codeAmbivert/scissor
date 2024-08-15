@@ -31,7 +31,7 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(name);
+    // console.log(name);
     setFormData({
       ...formData,
       [name]: value,
@@ -53,7 +53,7 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
     if (formData.name.trim().length < 1 || formData.name.trim().length > 15) {
       newErrors.name = "Name should be between 1 and 15 characters";
     }
-    if (!urlRegex.test(formData.longUrl)) {
+    if (!urlRegex.test(formData.longUrl.trim().toLowerCase())) {
       newErrors.longUrl = "Enter a valid url";
     }
     setErrors(newErrors);
@@ -61,6 +61,7 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
     if (Object.values(newErrors).some((error) => error)) return null;
 
     if (auth.currentUser) {
+      const code = nanoid(5);
       setLoading(true);
       let link = {
         name: formData.name.trim(),
@@ -68,11 +69,13 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
           formData.longUrl.includes("http://") ||
           formData.longUrl.includes("https://")
             ? formData.longUrl
-            : `http://${formData.longUrl.trim()}`,
+            : `http://${formData.longUrl.trim().toLowerCase()}`,
         createdAt: Timestamp.now(),
-        shortCode: nanoid(5),
+        previousCode: code,
+        shortCode: code,
         totalClicks: 0,
       };
+      // console.log("Link object created:", link);
 
       const userDocRef = doc(firestore, "users", auth.currentUser.uid);
       const linksCollectionRef = collection(userDocRef, "links");
@@ -80,6 +83,7 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
       addDoc(linksCollectionRef, link)
         .then((docRef) => {
           refresh();
+          // console.log(docRef);
           handleClose();
           setLoading(false);
         })
@@ -133,7 +137,13 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
             className="py-2 px-3 bg-primary rounded font-medium text-sm text-white"
           >
             {loading ? (
-              <RiseLoader size={5} color="#FFFFFF" />
+              <Image
+                alt="loading"
+                src="/spinner.gif"
+                height={20}
+                width={20}
+                className="mx-auto"
+              />
             ) : (
               "Submit"
             )}

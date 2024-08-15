@@ -53,7 +53,11 @@ const Account = () => {
   const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [openUser, setOpenUser] = useState<boolean>(false);
   const [openChangePassword, setOpenChangePassword] = useState<boolean>(false);
-  const [editData, setEditData] = useState({ name: "", id: "" });
+  const [editData, setEditData] = useState({
+    name: "",
+    id: "",
+    currentCode: "",
+  });
 
   // useEffect(() => {
   //   auth.onAuthStateChanged((user) => !user && router.push("/"));
@@ -106,7 +110,7 @@ const Account = () => {
         const linkDocRef = doc(userDocRef, "links", linkId);
         deleteDoc(linkDocRef)
           .then((docRef) => {
-            console.log("Document deleted", docRef);
+            // console.log("Document deleted", docRef);
             // refresh();
             // handleClose();
             toast.success("Link deleted successfully");
@@ -146,11 +150,11 @@ const Account = () => {
   //   fetchLinks();
   // }, []);
 
-  console.log(links);
+  // console.log(links);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log({ user });
+      // console.log({ user });
       if (!user) {
         router.push("/");
       } else {
@@ -266,7 +270,11 @@ const Account = () => {
                             className="border-2 border-blue-500 font-medium rounded-md text-blue-500 py-1 px-2"
                             onClick={() => {
                               setOpenEdit(true);
-                              setEditData({ name: item?.name, id: item?.id });
+                              setEditData({
+                                name: item?.name,
+                                id: item?.id,
+                                currentCode: item?.shortCode,
+                              });
                             }}
                           >
                             <MdOutlineEdit size={10} />
@@ -348,6 +356,7 @@ const Account = () => {
         onClose={setOpenEdit}
         name={editData?.name}
         id={editData?.id}
+        currentCode={editData?.currentCode}
         refresh={fetchLinks}
       />
       <ChangePasswordModal

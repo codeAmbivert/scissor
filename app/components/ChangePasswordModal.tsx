@@ -41,7 +41,7 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(name);
+    // console.log(name);
     setFormData({
       ...formData,
       [name]: value,
@@ -72,7 +72,7 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
         }, 2000);
       }
     } catch (error:any) {
-      console.log("code1", error?.code);
+      // console.log("code1", error?.code);
       if (error) {
         if (error?.code === "auth/wrong-password") {
           toast.error("Error updating password: Wrong password");
@@ -168,7 +168,7 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
           <button
             disabled={loading}
             onClick={handleChangePassword}
-            className="p-2 bg-primary text-white rounded-lg mt-5"
+            className="py-2 px-3 bg-primary text-white rounded-lg mt-5"
           >
             {loading ? (
               <Image

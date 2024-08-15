@@ -23,6 +23,7 @@ interface ShortenUrlProps {
   onClose: (value: boolean) => void;
   name: string;
   id: string;
+  currentCode: string;
   refresh: () => void;
 }
 
@@ -31,6 +32,7 @@ const UpdateShortCode = ({
   onClose,
   name,
   id,
+  currentCode,
   refresh,
 }: ShortenUrlProps) => {
   const auth = getAuth();
@@ -43,7 +45,6 @@ const UpdateShortCode = ({
     setNewCode(e.target.value);
     setErrors("");
   };
-  console.log("nanoid", nanoid(5));
 
   const handleClose = () => {
     setNewCode("");
@@ -52,7 +53,7 @@ const UpdateShortCode = ({
   };
 
   const handleSubmit = async () => {
-    let newErrors: { name?: string; longUrl?: string } = {};
+    setErrors("");
 
     if (auth.currentUser) {
       setLoading(true);
@@ -63,9 +64,13 @@ const UpdateShortCode = ({
       try {
         const linkDocRef = doc(linksCollectionRef, id);
         await updateDoc(linkDocRef, {
+          previousCode: currentCode,
+        });
+        await updateDoc(linkDocRef, {
           shortCode: newCode.replace(/\s+/g, ""),
         });
         toast.success("Short Code updated successfully");
+        setErrors("");
         refresh();
         handleClose();
       } catch (error) {
@@ -79,7 +84,7 @@ const UpdateShortCode = ({
   if (!open) return null;
   return (
     <div
-    title="modal"
+      title="modal"
       onClick={handleClose}
       className="fixed h-full w-full top-0 left-0 flex justify-center items-center bg-black bg-opacity-20 p-5"
     >
@@ -93,22 +98,10 @@ const UpdateShortCode = ({
             Update {name}&apos;s short URL
           </p>
           <button title="close" onClick={handleClose}>
-
-          <IoClose
-            size={20}
-            className="ml-auto cursor-pointer text-black"
-            
-            />
-            </button>
+            <IoClose size={20} className="ml-auto cursor-pointer text-black" />
+          </button>
         </div>
 
-        {/* <InputField
-          name="name"
-          label="Name"
-          value={formData.name}
-          onChange={handleInput}
-          error={errors.name}
-        /> */}
         <InputField
           name="longUrl"
           label="Short URL"
@@ -123,7 +116,13 @@ const UpdateShortCode = ({
             className="py-2 px-3 bg-primary rounded font-medium text-sm text-white"
           >
             {loading ? (
-              <RiseLoader size={5} color="#FFFFFF" />
+              <Image
+                alt="loading"
+                src="/spinner.gif"
+                height={20}
+                width={20}
+                className="mx-auto"
+              />
             ) : (
               "Update short URL"
             )}

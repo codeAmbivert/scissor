@@ -1,19 +1,14 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
-import { auth, firestore } from "../firebase";
+import { useEffect, useState } from "react";
+import { firestore } from "../firebase";
 import {
-  collection,
   doc,
   getDoc,
-  getDocs,
   increment,
-  query,
   updateDoc,
-  where,
 } from "firebase/firestore";
-import { RiseLoader } from "react-spinners";
 import Image from "next/image";
 
 const Redirect = () => {
@@ -21,61 +16,44 @@ const Redirect = () => {
   const { id: shortCode } = useParams();
   const [initialLoad, setInitialLoad] = useState(true);
 
-  const fetchLink = async () => {
-    if (typeof shortCode === "string") {
-      const docRef = doc(firestore, "links", shortCode);
-      const docSnap = await getDoc(docRef);
+  const fetchLinkDoc = async (): Promise<void> => {
+    if (typeof shortCode !== "string") {
+      setInitialLoad(false);
+      return;
+    }
 
-      if (docSnap.exists()) {
-        let { longUrl, linkId } = docSnap.data();
-        console.log({ longUrl });
-
-        // Query to find all documents with the same longUrl
-        const linksQuery = query(
-          collection(firestore, "links"),
-          where("longUrl", "==", longUrl)
-        );
-        const linksQuerySnapshot = await getDocs(linksQuery);
-
-        // Create an array of promises to update each document
-        const updatePromises = linksQuerySnapshot.docs.map((doc) =>
-          updateDoc(doc.ref, {
-            totalClicks: increment(1),
-          })
-        );
-
-        if (auth.currentUser) {
-          const userDocRef = doc(
+    try {
+      const linkDocRef = doc(firestore, "links", shortCode);
+      const linkDoc = await getDoc(linkDocRef);
+      if (linkDoc.exists()) {
+        const data = linkDoc.data();
+        if (data) {
+          const { longUrl, linkID, userUid } = data;
+          const userLinkDocRef = doc(
             firestore,
             "users",
-            auth.currentUser.uid,
+            userUid,
             "links",
-            linkId
+            linkID
           );
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            await updateDoc(userDocRef, {
-              totalClicks: increment(1),
-            });
-          } else {
-            console.log("error");
-          }
+          await updateDoc(userLinkDocRef, {
+            totalClicks: increment(1),
+          });
+          window.open(new URL(longUrl).toString(), "_blank");
+          router.back();
         }
-
-        // Wait for all update operations to complete
-        await Promise.all(updatePromises);
-
-        router.push(longUrl);
       } else {
-        console.log("No such document!");
         setInitialLoad(false);
       }
+    } catch (error) {
+      console.error("Error fetching link document:", error);
+      setInitialLoad(false);
     }
   };
 
   useEffect(() => {
     if (shortCode) {
-      fetchLink();
+      fetchLinkDoc();
     }
   }, [shortCode]);
 
@@ -83,9 +61,9 @@ const Redirect = () => {
     <main>
       {initialLoad ? (
         <div className="bg-primary min-h-screen flex flex-col items-center justify-center">
-        <Image src="/spinner.gif" alt="spinner" width={100} height={100} />
-        <p className="text-white font-medium mt-5">Redirecting...</p>
-      </div>
+          <Image src="/spinner.gif" alt="spinner" width={100} height={100} />
+          <p className="text-white font-medium mt-5">Redirecting...</p>
+        </div>
       ) : (
         <div className="min-h-screen flex flex-col items-center justify-center gap-10">
           <Image src="not_found.svg" width={200} height={200} alt="Not found" />
