@@ -187,7 +187,7 @@ const SignIn = ({ open, onClose }: SignInProps) => {
         <div className="flex justify-between items-end">
           <div className="text-black text-sm">
             {signIn && (
-              <div onClick={() => setSignIn(false)}>
+              <div className="cursor-pointer" onClick={() => setSignIn(false)}>
                 Don&apos;t have an account?{" "}
                 <span className="font-medium text-primary text-start whitespace-nowrap">
                   Sign up
@@ -195,7 +195,7 @@ const SignIn = ({ open, onClose }: SignInProps) => {
               </div>
             )}
             {!signIn && (
-              <div onClick={() => setSignIn(true)}>
+              <div  className="cursor-pointer" onClick={() => setSignIn(true)}>
                 Already have an account?{" "}
                 <span className="font-medium text-primary text-start whitespace-nowrap">
                   Sign in

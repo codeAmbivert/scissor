@@ -57,10 +57,10 @@ export default function Home() {
                 Strengthen your digital connection with cutt.live
               </h1>
               <p className="my-3 text-semibold ">
-                Utilize our URL shortener, QR Codes, and customizable landing
-                pages to engage your audience and direct them to the right
-                information. Create, edit, and monitor all your links seamlessly
-                within the Cutt.live Connections Platform
+                Utilize our URL shortener and QR Codes to engage your audience
+                and direct them to the right information. Create, edit, and
+                monitor all your links seamlessly within the Cutt.live
+                Connections Platform
               </p>
               <button
                 onClick={() => setOpenSignIn(true)}
