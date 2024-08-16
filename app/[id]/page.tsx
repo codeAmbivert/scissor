@@ -3,12 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { firestore } from "../firebase";
-import {
-  doc,
-  getDoc,
-  increment,
-  updateDoc,
-} from "firebase/firestore";
+import { doc, getDoc, increment, updateDoc } from "firebase/firestore";
 import Image from "next/image";
 
 const Redirect = () => {
@@ -17,44 +12,58 @@ const Redirect = () => {
   const [initialLoad, setInitialLoad] = useState(true);
 
   const fetchLinkDoc = async (): Promise<void> => {
-    if (typeof shortCode !== "string") {
-      setInitialLoad(false);
-      return;
-    }
+    console.log("try0");
+    if (typeof shortCode === "string") {
+      console.log("try1");
+      try {
+        const linkDocRef = doc(firestore, "links", shortCode);
+        const linkDoc = await getDoc(linkDocRef);
+        if (linkDoc.exists()) {
+          console.log("try2");
 
-    try {
-      const linkDocRef = doc(firestore, "links", shortCode);
-      const linkDoc = await getDoc(linkDocRef);
-      if (linkDoc.exists()) {
-        const data = linkDoc.data();
-        if (data) {
-          const { longUrl, linkID, userUid } = data;
-          const userLinkDocRef = doc(
-            firestore,
-            "users",
-            userUid,
-            "links",
-            linkID
-          );
-          await updateDoc(userLinkDocRef, {
-            totalClicks: increment(1),
-          });
-          window.open(new URL(longUrl).toString(), "_blank");
-          router.back();
+          const data = linkDoc.data();
+          console.log({ data });
+          if (data) {
+            console.log("try3");
+            const { longUrl, linkID, userUid } = data;
+            console.log("data", longUrl, linkID, userUid);
+            const userLinkDocRef = doc(
+              firestore,
+              "users",
+              userUid,
+              "links",
+              linkID
+            );
+            try {
+              console.log("try4");
+              await updateDoc(userLinkDocRef, {
+                totalClicks: increment(1),
+              });
+              window.open(new URL(longUrl).toString(), "_blank");
+              router.back();
+            } catch (updateError) {
+              console.error("Error updating document:", updateError);
+            }
+          }
+          // console.log({ shortCode });
+        } else {
+          setInitialLoad(false);
         }
-      } else {
+      } catch (error) {
+        console.log({ shortCode });
+        console.error("Error fetching link document:", error);
         setInitialLoad(false);
       }
-    } catch (error) {
-      console.error("Error fetching link document:", error);
+    } else {
       setInitialLoad(false);
     }
   };
 
   useEffect(() => {
-    if (shortCode) {
+    // if (typeof shortCode !== "string") {
       fetchLinkDoc();
-    }
+      console.log("shorty", typeof shortCode);
+    // }
   }, [shortCode]);
 
   return (
