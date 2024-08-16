@@ -250,6 +250,7 @@ const Account = () => {
                         <div className="flex gap-5 items-center mt-3">
                           <Link
                             href={`/${item?.shortCode}`}
+                            target="_blank"
                             className="text-primary"
                           >
                             {window.location.host}/{item?.shortCode}

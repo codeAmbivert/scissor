@@ -40,6 +40,11 @@ exports.linkUpdated = functions.firestore
     const { shortCode: previousCode } = beforeData;
     const { shortCode, longUrl } = afterData;
 
+    // Check if shortCode has changed
+    if (previousCode === shortCode) {
+      return null; // Exit if shortCode has not changed
+    }
+
     const deletePrevious = admin
       .firestore()
       .doc(`links/${previousCode}`)

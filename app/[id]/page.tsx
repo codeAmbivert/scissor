@@ -18,6 +18,7 @@ const Redirect = () => {
       try {
         const linkDocRef = doc(firestore, "links", shortCode);
         const linkDoc = await getDoc(linkDocRef);
+        console.log(linkDoc);
         if (linkDoc.exists()) {
           console.log("try2");
 
@@ -39,8 +40,8 @@ const Redirect = () => {
               await updateDoc(userLinkDocRef, {
                 totalClicks: increment(1),
               });
-              window.open(new URL(longUrl).toString(), "_blank");
-              router.back();
+
+              router.push(longUrl);
             } catch (updateError) {
               console.error("Error updating document:", updateError);
             }
@@ -48,9 +49,11 @@ const Redirect = () => {
           // console.log({ shortCode });
         } else {
           setInitialLoad(false);
+          console.log("failed1");
         }
       } catch (error) {
-        console.log({ shortCode });
+        console.log("failed2");
+        // console.log({ shortCode });
         console.error("Error fetching link document:", error);
         setInitialLoad(false);
       }
@@ -61,8 +64,8 @@ const Redirect = () => {
 
   useEffect(() => {
     // if (typeof shortCode !== "string") {
-      fetchLinkDoc();
-      console.log("shorty", typeof shortCode);
+    fetchLinkDoc();
+    console.log("shorty", typeof shortCode);
     // }
   }, [shortCode]);
 
