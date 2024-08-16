@@ -1,3 +1,34 @@
+# Cutt.live
+
+This repository has 5 pages.
+- The Index page
+- The Account page
+- The Id page for each live link
+- Vitest
+
+### The index page
+This is the login page where users can read about the website, login and signup
+
+### The Account page
+This page has multiple functions
+- A modal to shorten url links -> It take in two inputs. The name for the url and a long url link for it to shorten
+- A list of al created short links -> It item in the list includes the name, long url link, shortened url link (cutt.live/<id which is usually a 5 digit string>) total clicks, a downloadable qr code, copy, edit and delete buttons
+- An update modal -> The shortened url has a code which can be updated by the user to any thing they like in other to better represent their business on link
+  
+
+### The Id page for each live link
+The id page is used to get the data for each shortened link, update total clicks and redirect the user to the long link. It also serves as the Error 404 page because it checks for any path that isnt /account in the database and if it doesnt exist a 404 erroris displayed
+
+### Vitest
+Vitest was added to include for unit and component testing
+
+
+- [The link to the working - cutt.live](https://github-repo-32gy.vercel.app/)
+- [Incase that doesnt work - vercel build](https://scissor-codeambiverts-projects.vercel.app/)
+
+
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
