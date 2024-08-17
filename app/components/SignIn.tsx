@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import { LuEyeOff } from "react-icons/lu";
 import Image from "next/image";
+import Link from "next/link";
 
 interface SignInProps {
   open: boolean;
@@ -162,6 +163,12 @@ const SignIn = ({ open, onClose }: SignInProps) => {
           error={errors.password}
           onChange={handleInput}
         />
+        {/* {signIn && (
+          <Link href="/forgot-password" className="underline text-start w-fit">
+            Forgot password?
+          </Link>
+        )} */}
+
         {!signIn && (
           <InputField
             name="confirmPassword"
@@ -195,7 +202,7 @@ const SignIn = ({ open, onClose }: SignInProps) => {
               </div>
             )}
             {!signIn && (
-              <div  className="cursor-pointer" onClick={() => setSignIn(true)}>
+              <div className="cursor-pointer" onClick={() => setSignIn(true)}>
                 Already have an account?{" "}
                 <span className="font-medium text-primary text-start whitespace-nowrap">
                   Sign in

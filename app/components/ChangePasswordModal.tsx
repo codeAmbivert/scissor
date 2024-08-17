@@ -4,6 +4,7 @@ import { IoClose, IoEyeOutline } from "react-icons/io5";
 import InputField from "./InputField";
 import { auth } from "../firebase";
 import {
+  confirmPasswordReset,
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
@@ -32,7 +33,10 @@ export const reauthenticateUser = (currentPassword: string) => {
 const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
   const [pwrdVisible, setPwrdVisible] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string>("");
+  const [errors, setErrors] = useState<{
+    newPassword?: string;
+    confirmPassword?: string;
+  }>({});
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -46,20 +50,27 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
       ...formData,
       [name]: value,
     });
-    setErrors("");
+    setErrors({});
   };
 
   const handleClose = () => {
     setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    setErrors("");
+    setErrors({});
     onClose(false);
   };
 
   const handleChangePassword = async () => {
-    if (formData.newPassword !== formData.confirmPassword) {
-      setErrors("Passwords do not match");
-      return;
+    const newErrors = { newPassword: "", confirmPassword: "" };
+    if (!formData.newPassword) {
+      newErrors.newPassword = "Password is required";
     }
+    if (formData.newPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match ";
+    }
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some((error) => error)) return null;
+
     setLoading(true);
     try {
       await reauthenticateUser(formData.currentPassword);
@@ -68,17 +79,22 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
         await updatePassword(user, formData.newPassword);
         toast.success("Password updated successfully");
         setTimeout(() => {
+          setFormData({
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+          });
           setLoading(false);
         }, 2000);
       }
-    } catch (error:any) {
-      // console.log("code1", error?.code);
+    } catch (error: any) {
+      console.log(error?.message);
       if (error) {
-        if (error?.code === "auth/wrong-password") {
-          toast.error("Error updating password: Wrong password");
-        } else {
-          toast.error("Error updating password: Try again later");
-        }
+        // if (error?.code === "auth/wrong-password") {
+        //   toast.error("Error updating password: Wrong password");
+        // } else {
+        toast.error(error?.message);
+        // }
         setTimeout(() => {
           setLoading(false);
         }, 2000);
@@ -143,6 +159,7 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
                 </button>
               )
             }
+            error={errors.newPassword}
             onChange={handleInput}
           />
           <InputField
@@ -163,7 +180,7 @@ const ChangePasswordModal = ({ open, onClose }: PasswoedModalProps) => {
               )
             }
             onChange={handleInput}
-            error={errors}
+            error={errors.confirmPassword}
           />
           <button
             disabled={loading}

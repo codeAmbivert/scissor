@@ -5,10 +5,9 @@ import { useEffect, useState } from "react";
 import { auth } from "./firebase";
 import { useRouter } from "next/navigation";
 import { Nunito, Revalia } from "next/font/google";
-import { RiseLoader } from "react-spinners";
 import Loading from "./components/Loading";
 
-const inter = Revalia({
+const revalia = Revalia({
   subsets: ["latin"],
   weight: ["400"],
 });
@@ -53,7 +52,7 @@ export default function Home() {
         <div className="flex justify-between items-center h-[80vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mx-auto">
             <div className="flex flex-col my-auto max-w-2xl ">
-              <h1 className={`${inter.className} text-4xl font-extrabold`}>
+              <h1 className={`${revalia.className} text-4xl font-extrabold`}>
                 Strengthen your digital connection with cutt.live
               </h1>
               <p className="my-3 text-semibold ">

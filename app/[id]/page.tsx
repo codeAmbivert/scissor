@@ -79,7 +79,7 @@ const Redirect = () => {
       ) : (
         <div className="min-h-screen flex flex-col items-center justify-center gap-10">
           <Image src="not_found.svg" width={200} height={200} alt="Not found" />
-          Link is not valid
+          Link is either not available or not valid. 
         </div>
       )}
     </main>
