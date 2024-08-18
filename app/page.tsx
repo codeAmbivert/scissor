@@ -36,7 +36,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto">
+      <div className="p-5 max-w-7xl mx-auto">
         <div className="flex justify-between items-center h-[80vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mx-auto">
             <div className="flex flex-col my-auto max-w-2xl ">

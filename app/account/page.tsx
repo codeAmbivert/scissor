@@ -17,7 +17,6 @@ import {
 } from "firebase/firestore";
 import Image from "next/image";
 import { toast } from "react-toastify";
-import { Nunito } from "next/font/google";
 import { LuCopy } from "react-icons/lu";
 import { FaRegTrashAlt } from "react-icons/fa";
 import axios from "axios";
@@ -27,10 +26,6 @@ import UpdateShortCode from "../components/UpdateShortCode";
 import Loading from "../components/Loading";
 import Layout from "../components/layout/Layout";
 
-const nunito = Nunito({
-  subsets: ["latin"],
-  // weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-});
 
 interface Link {
   id: string;
