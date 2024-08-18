@@ -57,8 +57,8 @@ export default function ForgotPassword() {
 
   const checkUserExists = async (email: string) => {
     try {
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      return signInMethods.length > 0;
+      await fetchSignInMethodsForEmail(auth, email);
+      return true;
     } catch (error) {
       console.error("Error checking user existence:", error);
       return false;
@@ -67,11 +67,11 @@ export default function ForgotPassword() {
 
   const sendResetEmail = async () => {
     try {
-      // const userExists = await checkUserExists(formData.email);
-      // if (!userExists) {
-      //   setErrors({ email: "User does not exist" });
-      //   return;
-      // }
+      const userExists = await checkUserExists(formData.email);
+      if (!userExists) {
+        setErrors({ email: "User does not exist" });
+        return;
+      }
       await sendPasswordResetEmail(auth, formData.email);
       console.log("Password reset email sent successfully.");
     } catch (error) {
