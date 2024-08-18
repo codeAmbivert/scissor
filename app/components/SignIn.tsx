@@ -163,11 +163,11 @@ const SignIn = ({ open, onClose }: SignInProps) => {
           error={errors.password}
           onChange={handleInput}
         />
-        {/* {signIn && (
+        {signIn && (
           <Link href="/forgot-password" className="underline text-start w-fit">
             Forgot password?
           </Link>
-        )} */}
+        )}
 
         {!signIn && (
           <InputField

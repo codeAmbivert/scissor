@@ -12,6 +12,8 @@ import {
   updatePassword,
 } from "firebase/auth";
 import InputField from "../components/InputField";
+import Link from "next/link";
+import { toast, ToastContainer } from "react-toastify";
 
 const revalia = Revalia({
   subsets: ["latin"],
@@ -36,15 +38,6 @@ export default function ForgotPassword() {
     confirmPassword?: string;
   }>({});
 
-  const forgotPassword = async () => {
-    try {
-      await sendPasswordResetEmail(auth, formData.email);
-      console.log("Password reset email sent successfully.");
-    } catch (error) {
-      console.error("Error sending password reset email:", error);
-    }
-  };
-
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -55,44 +48,30 @@ export default function ForgotPassword() {
     setErrors({});
   };
 
-  const checkUserExists = async (email: string) => {
-    try {
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      return signInMethods.length > 0;
-    } catch (error: any) {
-      if (error.code === "auth/invalid-api-key") {
-        console.error("Invalid API key:", error);
-        setErrors({
-          email: "Invalid API key. Please check your Firebase configuration.",
-        });
-      } else if (error.code === "auth/network-request-failed") {
-        console.error("Network request failed:", error);
-        setErrors({
-          email:
-            "Network request failed. Please check your network connection.",
-        });
-      } else {
-        console.error("Error checking user existence:", error);
-        setErrors({
-          email:
-            "An error occurred while checking user existence. Please try again later.",
-        });
-      }
-      return false;
-    }
-  };
+  // const checkUserExists = async (email: string) => {
+  //   try {
+  //     const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+  //     return signInMethods.length > 0;
+  //   } catch (error) {
+  //     console.error("Error checking user existence:", error);
+  //     return false;
+  //   }
+  // };
 
   const sendResetEmail = async () => {
+    setLoading(true);
     try {
-      const userExists = await checkUserExists(formData.email);
-      if (!userExists) {
-        setErrors({ email: "User does not exist" });
-        return;
-      }
+      // const userExists = await checkUserExists(formData.email);
+      // if (!userExists) {
+      //   setErrors({ email: "User does not exist" });
+      //   return;
+      // }
       await sendPasswordResetEmail(auth, formData.email);
-      console.log("Password reset email sent successfully.");
+      toast.success("Password reset email sent successfully.");
+      setLoading(false);
     } catch (error) {
-      console.error("Error sending password reset email:", error);
+      toast.error("Error sending password reset email");
+      setLoading(false);
     }
   };
 
@@ -114,9 +93,12 @@ export default function ForgotPassword() {
 
   return (
     <main className={`${nunito.className} min-h-screen p-5`}>
+      <ToastContainer />
       <div className="max-w-7xl mx-auto">
         <nav className="flex items-center justify-between">
-          <p className="text-3xl font-bold">Cutt.live</p>
+          <Link href="/" className="text-3xl font-bold">
+            Cutt.live
+          </Link>
           {/* <button
             className="font-medium py-3 px-8 rounded-md text-white bg-primary"
             onClick={() => setOpenSignIn(true)}
@@ -137,9 +119,18 @@ export default function ForgotPassword() {
             <button
               onClick={handleSendEmail}
               disabled={loading}
-              className="py-2 px-3 bg-primary rounded font-medium text-sm text-white"
+              className="py-2 px-3 bg-primary rounded font-medium text-sm text-white flex justify-center"
             >
-              Send Code
+              {loading ? (
+                <Image
+                  alt="loading"
+                  src="/spinner.gif"
+                  height={20}
+                  width={20}
+                />
+              ) : (
+                "Reset Password"
+              )}
             </button>
           </div>
         </div>
