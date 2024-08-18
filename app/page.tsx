@@ -4,16 +4,13 @@ import SignIn from "./components/SignIn";
 import { useEffect, useState } from "react";
 import { auth } from "./firebase";
 import { useRouter } from "next/navigation";
-import { Nunito, Revalia } from "next/font/google";
+import { Revalia } from "next/font/google";
 import Loading from "./components/Loading";
+import Layout from "./components/layout/Layout";
 
 const revalia = Revalia({
   subsets: ["latin"],
   weight: ["400"],
-});
-const nunito = Nunito({
-  subsets: ["latin"],
-  // weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export default function Home() {
@@ -38,17 +35,8 @@ export default function Home() {
   }
 
   return (
-    <main className={`${nunito.className} min-h-screen p-5`}>
+    <Layout>
       <div className="max-w-7xl mx-auto">
-        <nav className="flex items-center justify-between">
-          <p className="text-3xl font-bold">Cutt.live</p>
-          <button
-            className="font-medium py-3 px-8 rounded-md text-white bg-primary"
-            onClick={() => setOpenSignIn(true)}
-          >
-            Login
-          </button>
-        </nav>
         <div className="flex justify-between items-center h-[80vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mx-auto">
             <div className="flex flex-col my-auto max-w-2xl ">
@@ -79,6 +67,6 @@ export default function Home() {
         </div>
       </div>
       <SignIn open={openSignIn} onClose={setOpenSignIn} />
-    </main>
+    </Layout>
   );
 }

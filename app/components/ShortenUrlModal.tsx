@@ -31,7 +31,6 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // console.log(name);
     setFormData({
       ...formData,
       [name]: value,
@@ -75,7 +74,6 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
         shortCode: code,
         totalClicks: 0,
       };
-      // console.log("Link object created:", link);
 
       const userDocRef = doc(firestore, "users", auth.currentUser.uid);
       const linksCollectionRef = collection(userDocRef, "links");
@@ -83,7 +81,6 @@ const ShortenUrlModal = ({ open, onClose, refresh }: ShortenUrlProps) => {
       addDoc(linksCollectionRef, link)
         .then((docRef) => {
           refresh();
-          // console.log(docRef);
           handleClose();
           setLoading(false);
         })

@@ -15,7 +15,6 @@ exports.linkCreated = functions.firestore
   .onCreate((snapshot, context) => {
     const { userUid, linkID } = context.params;
     const { longUrl, shortCode } = snapshot.data();
-    console.log(snapshot.data());
 
     return admin.firestore().doc(`links/${shortCode}`).set({
       userUid,

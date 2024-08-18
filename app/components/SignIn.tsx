@@ -78,7 +78,6 @@ const SignIn = ({ open, onClose }: SignInProps) => {
         if (err instanceof Error) {
           // Type guard to narrow down the type
           toast.error(err.message);
-          // console.log(err);
         } else {
           // Handle the case where the error is not an instance of Error
           console.log("An unexpected error occurred", err);
@@ -104,11 +103,8 @@ const SignIn = ({ open, onClose }: SignInProps) => {
         router.push("/account");
       } catch (err) {
         if (err instanceof Error) {
-          // Type guard to narrow down the type
           toast.error(err.message);
-          // console.log(err);
         } else {
-          // Handle the case where the error is not an instance of Error
           console.log("An unexpected error occurred", err);
         }
         setLoading(false);
