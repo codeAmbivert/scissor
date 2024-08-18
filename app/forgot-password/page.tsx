@@ -57,10 +57,27 @@ export default function ForgotPassword() {
 
   const checkUserExists = async (email: string) => {
     try {
-      await fetchSignInMethodsForEmail(auth, email);
-      return true;
-    } catch (error) {
-      console.error("Error checking user existence:", error);
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+      return signInMethods.length > 0;
+    } catch (error: any) {
+      if (error.code === "auth/invalid-api-key") {
+        console.error("Invalid API key:", error);
+        setErrors({
+          email: "Invalid API key. Please check your Firebase configuration.",
+        });
+      } else if (error.code === "auth/network-request-failed") {
+        console.error("Network request failed:", error);
+        setErrors({
+          email:
+            "Network request failed. Please check your network connection.",
+        });
+      } else {
+        console.error("Error checking user existence:", error);
+        setErrors({
+          email:
+            "An error occurred while checking user existence. Please try again later.",
+        });
+      }
       return false;
     }
   };
