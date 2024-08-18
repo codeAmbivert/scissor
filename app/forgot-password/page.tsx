@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { useRouter } from "next/navigation";
 import { Nunito, Revalia } from "next/font/google";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+import {
+  fetchSignInMethodsForEmail,
+  getAuth,
+  sendPasswordResetEmail,
+  updatePassword,
+} from "firebase/auth";
 import InputField from "../components/InputField";
 
 const revalia = Revalia({
@@ -50,14 +55,43 @@ export default function ForgotPassword() {
     setErrors({});
   };
 
-  const handleSendEmail = () => {
+  const checkUserExists = async (email: string) => {
+    try {
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+      return signInMethods.length > 0;
+    } catch (error) {
+      console.error("Error checking user existence:", error);
+      return false;
+    }
+  };
+
+  const sendResetEmail = async () => {
+    try {
+      const userExists = await checkUserExists(formData.email);
+      if (!userExists) {
+        setErrors({ email: "User does not exist" });
+        return;
+      }
+      await sendPasswordResetEmail(auth, formData.email);
+      console.log("Password reset email sent successfully.");
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+    }
+  };
+
+  const handleSendEmail = async () => {
     let newError: { email?: string } = {};
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (formData.email) {
+    if (!formData.email) {
       newError.email = "Email is required";
     } else if (!emailRegex.test(formData.email)) {
       newError.email = "Email is not valid";
+    }
+    setErrors(newError);
+
+    if (Object.keys(newError).length === 0) {
+      sendResetEmail();
     }
   };
 
@@ -81,9 +115,10 @@ export default function ForgotPassword() {
               name="email"
               value={formData.email}
               onChange={handleInput}
+              error={errors.email}
             />
             <button
-              onClick={forgotPassword}
+              onClick={handleSendEmail}
               disabled={loading}
               className="py-2 px-3 bg-primary rounded font-medium text-sm text-white"
             >
