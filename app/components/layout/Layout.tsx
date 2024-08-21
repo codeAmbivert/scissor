@@ -14,7 +14,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div>
       <ToastContainer />
-      <div className={`${bgClass} fixed top-0 left-0 w-full`}>
+      <div className={`${bgClass} fixed top-0 left-0 w-full z-[200]`}>
         <Header />
       </div>
       <main className="mt-28">{children}</main>
