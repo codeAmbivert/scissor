@@ -23,7 +23,7 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className={`${nunito.className} p-5 py-8`}>
+    <nav className={`${nunito.className} p-5 py-8 z-50`}>
       <div className={` max-w-7xl mx-auto flex items-center justify-between`}>
         <Link href="/" className="text-3xl font-bold">
           Cutt.live
