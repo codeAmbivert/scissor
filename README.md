@@ -24,7 +24,6 @@ Vitest was added to include for unit and component testing
 
 
 - [The link to the working - cutt.live](https://github-repo-32gy.vercel.app/)
-- [Incase that doesnt work - vercel build](https://scissor-codeambiverts-projects.vercel.app/)
 
 
 
