@@ -23,7 +23,7 @@ The id page is used to get the data for each shortened link, update total clicks
 Vitest was added to include for unit and component testing
 
 
-- [The link to the working - cutt.live](https://github-repo-32gy.vercel.app/)
+- [The link to the live site - cutt.live](https://cutt.live/)
 
 
 
